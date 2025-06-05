@@ -1,7 +1,7 @@
 {
   "name": "Game 20G8 NFT - Level 2",
   "description": "A humble beginning! Achieved a tile of 2 in the 2048 game.",
-  "image": "https://arcxteam.github.io/2048-Onchain-Game/nft-assets/images/2.png",
+  "image": "https://arcxteam.github.io/2048-Onchain-Game/blob/metadata/nft-assets/images/2.jpg",
   "attributes": [
     { "trait_type": "Level", "value": 2 },
     { "trait_type": "Highest Tile", "value": 2 }
