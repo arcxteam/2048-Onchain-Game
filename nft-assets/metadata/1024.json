@@ -1,7 +1,7 @@
 {
   "name": "Game 20G8 NFT - Level 1024",
   "description": "Incredible! Achieved a tile of 1024 in the 2048 game.",
-  "image": "https://arcxteam.github.io/2048-Onchain-Game/blob/metadata/nft-assets/images/1024.jpg",
+  "image": "https://arcxteam.github.io/2048-Onchain-Game/nft-assets/images/128.jpg",
   "attributes": [
     { "trait_type": "Level", "value": 1024 },
     { "trait_type": "Highest Tile", "value": 1024 }
