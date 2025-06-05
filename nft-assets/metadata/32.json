@@ -1,0 +1,9 @@
+{
+  "name": "Game 20G8 NFT - Level 32",
+  "description": "Well done! Reached a tile of 32 in the 2048 game.",
+  "image": "https://arcxteam.github.io/2048-Onchain-Game/nft-assets/images/32.png",
+  "attributes": [
+    { "trait_type": "Level", "value": 32 },
+    { "trait_type": "Highest Tile", "value": 32 }
+  ]
+}
