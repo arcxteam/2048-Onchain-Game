@@ -1,7 +1,7 @@
 {
   "name": "Game 20G8 NFT - Level 512",
   "description": "Amazing skills! You've hit a tile of 512 in the 2048 game.",
-  "image": "https://arcxteam.github.io/2048-Onchain-Game/nft-assets/images/512.png",
+  "image": "https://arcxteam.github.io/2048-Onchain-Game/blob/metadata/nft-assets/images/512.jpg",
   "attributes": [
     { "trait_type": "Level", "value": 512 },
     { "trait_type": "Highest Tile", "value": 512 }
