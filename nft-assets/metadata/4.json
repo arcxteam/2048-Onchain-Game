@@ -1,7 +1,7 @@
 {
   "name": "Game 20G8 NFT - Level 4",
   "description": "Nice start! Reached a tile of 4 in the 2048 game.",
-  "image": "https://arcxteam.github.io/2048-Onchain-Game/nft-assets/images/4.png",
+  "image": "https://arcxteam.github.io/2048-Onchain-Game/blob/metadata/nft-assets/images/4.jpg",
   "attributes": [
     { "trait_type": "Level", "value": 4 },
     { "trait_type": "Highest Tile", "value": 4 }
