@@ -68,18 +68,18 @@ const Footer: React.FC = () => {
           onClick={startPayment}
           className="font-lg mt-2 w-full px-16 py-4"
         >
-          Donate to Me
+          Select Mode - Chain
         </button>
       </div>
       <p>
-        Built by RSR for{' '}
+        Onchain 2048{' '}
         <a
-          href="https://ethglobal.com/events/brussels"
+          href="https://cuannode.greyscope.xyz"
           target="_blank"
           rel="noopener noreferrer"
           className="font-bold underline"
         >
-          ETH Global Brussels 2024
+          © 2025 Greyscope&Co @0xgrey. All Rights Reserved.
         </a>
         .
       </p>
