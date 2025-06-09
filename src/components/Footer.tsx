@@ -52,7 +52,7 @@ const Footer: React.FC = () => {
           token_amount: tokenToDecimals(3, Tokens.USDCE).toString(),
         },
       ],
-      description: 'Donate to me',
+      description: 'Select Mode - Chain',
     };
 
     if (MiniKit.isInstalled()) {
