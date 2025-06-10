@@ -1,7 +1,7 @@
 {
   "name": "Game 20G8 NFT - Level 256",
   "description": "Fantastic! Reached a tile of 256 in the 2048 game.",
-  "image": "https://arcxteam.github.io/2048-Onchain-Game/nft-assets/images/256.jpg",
+  "image": "https://arcxteam.github.io/2048-Onchain-Game/nft-assets/images/256.JPG",
   "attributes": [
     { "trait_type": "Level", "value": 256 },
     { "trait_type": "Highest Tile", "value": 256 }
