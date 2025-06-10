@@ -14,9 +14,9 @@ const Control = () => {
   return (
     <button
       onClick={() => dispatch(reset())}
-      className="w-full bg-black px-16 py-4"
+      className="w-full text-[#47e94f] bg-black px-16 py-4"
     >
-      New game
+      New Game
     </button>
   );
 };
