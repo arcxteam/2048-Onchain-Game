@@ -85,29 +85,29 @@ const Tile: React.FC<TileProps> = ({ value, animations }) => {
   function tileImage(value: number): string {
     switch (value) {
       case 2:
-        return '/game-assets/2.png';
+        return '/game-assets/2.jpg';
       case 4:
-        return '/game-assets/4.png';
+        return '/game-assets/4.jpg';
       case 8:
-        return '/game-assets/8.png';
+        return '/game-assets/8.jpg';
       case 16:
-        return '/game-assets/16.png';
+        return '/game-assets/16.jpg';
       case 32:
-        return '/game-assets/32.png';
+        return '/game-assets/32.jpg';
       case 64:
-        return '/game-assets/64.png';
+        return '/game-assets/64.jpg';
       case 128:
-        return '/game-assets/128.png';
+        return '/game-assets/128.jpg';
       case 256:
-        return '/game-assets/256.png';
+        return '/game-assets/256.jpg';
       case 512:
-        return '/game-assets/512.png';
+        return '/game-assets/512.jpg';
       case 1024:
-        return '/game-assets/1024.png';
+        return '/game-assets/1024.jpg';
       case 2048:
-        return '/game-assets/2048.png';
+        return '/game-assets/2048.jpg';
       default:
-        return '/game-assets/2.png';
+        return '/game-assets/2.jpg';
     }
   }
 
