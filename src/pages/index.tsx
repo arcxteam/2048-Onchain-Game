@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Play 2048!</title>
+        <title>Onchain Game 2048</title>
       </Head>
       <main className="mx-auto grid h-screen max-w-lg items-center p-4 py-8">
         <Header />
