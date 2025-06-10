@@ -52,7 +52,7 @@ const Footer: React.FC = () => {
           token_amount: tokenToDecimals(3, Tokens.USDCE).toString(),
         },
       ],
-      description: 'Select Mode - Chain',
+      description: 'Select Mode',
     };
 
     if (MiniKit.isInstalled()) {
@@ -61,7 +61,7 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#776e65]">
+    <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#000000]">
       <div className="mt-2 w-full">
         <Control />
         <button
@@ -72,14 +72,14 @@ const Footer: React.FC = () => {
         </button>
       </div>
       <p>
-        Onchain 2048{' '}
+        Onchain Game2048{' '}
         <a
           href="https://cuannode.greyscope.xyz"
           target="_blank"
           rel="noopener noreferrer"
           className="font-bold underline"
         >
-          © 2025 Greyscope&Co @0xgrey. All Rights Reserved.
+          © 2025 Greyscope&Co. @0xgr3y
         </a>
         .
       </p>
