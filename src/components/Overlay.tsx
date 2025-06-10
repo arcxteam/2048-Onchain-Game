@@ -19,11 +19,11 @@ const Overlay: React.FC = () => {
 
   if (victory) {
     return (
-      <div className="z-999 absolute bottom-0 left-0 right-0 top-0 flex flex-col justify-center bg-[#EEE4DA] bg-opacity-80 text-center align-middle">
+      <div className="z-999 absolute bottom-0 left-0 right-0 top-0 flex flex-col justify-center bg-[#eb3fb7] bg-opacity-80 text-center align-middle">
         <h1 className="text-2xl font-bold">You win!</h1>
         <div className="flex justify-center gap-2">
           <button onClick={dismiss}>Keep going</button>
-          <button onClick={reset}>Try again</button>
+          <button onClick={reset}>Try Level again</button>
         </div>
       </div>
     );
@@ -31,11 +31,11 @@ const Overlay: React.FC = () => {
 
   if (defeat) {
     return (
-      <div className="z-999 absolute bottom-0 left-0 right-0 top-0 flex flex-col justify-center bg-[#f08437] bg-opacity-50 text-center align-middle">
-        <h1 className="text-2xl font-bold">Game over!</h1>
+      <div className="z-999 absolute bottom-0 left-0 right-0 top-0 flex flex-col justify-center bg-[#4ee480] bg-opacity-50 text-center align-middle">
+        <h1 className="text-2xl font-bold">GAME OVER!</h1>
         <div>
           <button onClick={reset} className="opacity-100">
-            Try again
+            ClaimNFT & Try Level again
           </button>
         </div>
       </div>
