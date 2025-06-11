@@ -1,9 +1,11 @@
 {
-  "name": "Game 20G8 NFT - Level 128",
-  "description": "Great job! Achieved a tile of 128 in the 2048 game.",
+  "name": "Panda Twirly Spacewhack",
+  "description": "An astronaut panda that twirls in zero gravity, whacking out starry doodles with a jetpack.",
   "image": "https://arcxteam.github.io/2048-Onchain-Game/nft-assets/images/128.JPG",
   "attributes": [
-    { "trait_type": "Level", "value": 128 },
-    { "trait_type": "Highest Tile", "value": 128 }
+    {"trait_type": "Level", "value": 128},
+    {"trait_type": "Highest Tile", "value": 128},
+    {"trait_type": "Color", "value": "Coral Orange & Purple"},
+    {"trait_type": "Attribute", "value": "Jetpack"}
   ]
 }
