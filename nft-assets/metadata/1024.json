@@ -1,9 +1,11 @@
 {
-  "name": "Game 20G8 NFT - Level 1024",
-  "description": "Incredible! Achieved a tile of 1024 in the 2048 game.",
+  "name": "Panda Bloopz Hammerglow",
+  "description": "A panda with a hammer that bloops glowing gloom, building surreal structures in the dark.",
   "image": "https://arcxteam.github.io/2048-Onchain-Game/nft-assets/images/1024.JPG",
   "attributes": [
-    { "trait_type": "Level", "value": 1024 },
-    { "trait_type": "Highest Tile", "value": 1024 }
+    {"trait_type": "Level", "value": 1024},
+    {"trait_type": "Highest Tile", "value": 1024},
+    {"trait_type": "Color", "value": "Coral Orange & Yellow"},
+    {"trait_type": "Attribute", "value": "Hammer"}
   ]
 }
