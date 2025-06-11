@@ -61,7 +61,7 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#000000]">
+    <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#adadad]">
       <div className="mt-2 w-full">
         <Control />
         <button
@@ -72,14 +72,14 @@ const Footer: React.FC = () => {
         </button>
       </div>
       <p>
-        Onchain Game2048{' '}
+        Onchain 2048{' '}
         <a
           href="https://cuannode.greyscope.xyz"
           target="_blank"
           rel="noopener noreferrer"
           className="font-bold underline"
         >
-          © 2025 Greyscope&Co. @0xgr3y
+          © 2025 Greyscope&Co. by@0xgr3y
         </a>
         .
       </p>
