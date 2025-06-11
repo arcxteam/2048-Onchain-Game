@@ -1,9 +1,11 @@
 {
-  "name": "Game 20G8 NFT - Level 4",
-  "description": "Nice start! Reached a tile of 4 in the 2048 game.",
+  "name": "Panda Floopz Gemwobble",
+  "description": "A guide panda whose 2048 game wobbles, flooping odd landmarks into existence.",
   "image": "https://arcxteam.github.io/2048-Onchain-Game/nft-assets/images/4.JPG",
   "attributes": [
-    { "trait_type": "Level", "value": 4 },
-    { "trait_type": "Highest Tile", "value": 4 }
+    {"trait_type": "Level", "value": 4},
+    {"trait_type": "Highest Tile", "value": 4},
+    {"trait_type": "Color", "value": "Purple & Blue"},
+    {"trait_type": "Attribute", "value": "20G8"}
   ]
 }
