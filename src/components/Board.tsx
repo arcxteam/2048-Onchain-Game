@@ -8,7 +8,7 @@ import { moveAction } from '@/store/action';
 import { type BoardType } from '@/utils/board';
 import { type Animation, AnimationType } from '@/types/Animations';
 import Overlay from './Overlay';
-import { useBlockchain } from '@/minikitprovider'; // Perbaiki dari '@/src/minikitprovider'
+import { useBlockchain } from '@/providers/minikitprovider'; // Perbaiki path impor
 
 const Board = () => {
   const dispatch = useAppDispatch();
@@ -110,7 +110,7 @@ const Board = () => {
       setRenderedBoard([...board]);
     }
     lastBoard.current = [...board];
-  }, [animations, board, setRenderedBoard, setRenderedAnimations]);
+  }, [animations, board]);
 
   return (
     <div className="relative">
