@@ -1,11 +1,9 @@
-// src/minikitprovider.tsx
 'use client';
 
 import { ethers } from 'ethers';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { networkConfigs, contractAddress, abi } from '@/config/networks'; // Perbaiki path dari '../config/networks' ke '@/config/networks'
-import ABI from './api/ABI.json';
-
+import { networkConfigs, contractAddress, abi } from '@/config/networks';
+import ABI from '../pages/api/ABI.json';
 const BlockchainContext = createContext<{
   contract: ethers.Contract | null;
   approvePlayer: () => Promise<void>;
