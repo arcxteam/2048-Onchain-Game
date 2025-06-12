@@ -2,12 +2,12 @@ import Image from 'next/image';
 import Control from './Control';
 import useAppSelector from '@/hooks/useAppSelector';
 import React, { useEffect, useState } from 'react';
-import { useBlockchain } from '@/providers/minikitprovider'; // Perbaiki path impor
+import { useBlockchain } from '@/providers/minikitprovider';
 
 const Header = () => {
   const score = useAppSelector((state) => state.app.score);
   const best = useAppSelector((state) => state.app.best);
-  const { contract } = useBlockchain();
+  const { contract, connectWallet } = useBlockchain(); // Tambah connectWallet
   const [playerId, setPlayerId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,6 +31,12 @@ const Header = () => {
       <div className="flex justify-between align-middle">
         <div className="grid grid-cols-1 items-center gap-x-3">
           <Image src="/2048-color.png" width={300} height={300} alt="logo" />
+          <button
+            onClick={connectWallet}
+            className="ml-4 bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            {playerId ? 'Connected' : 'Connect Wallet'}
+          </button>
         </div>
         <div className="flex gap-5">
           <div className="m-auto flex gap-x-2 rounded-md bg-black p-3 text-center font-bold text-[#ff833b]">
@@ -43,7 +49,7 @@ const Header = () => {
           </div>
           <div className="m-auto flex gap-x-2 rounded-md bg-black p-3 text-center font-bold text-white">
             <div className="font-bold uppercase">Wallet: </div>
-            <div>{playerId ? `${playerId.slice(0, 6)}...${playerId.slice(-4)}` : 'Connect'}</div>
+            <div>{playerId ? `${playerId.slice(0, 6)}...${playerId.slice(-4)}` : 'Not Connected'}</div>
           </div>
         </div>
       </div>
