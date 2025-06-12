@@ -1,11 +1,11 @@
-import Board from '@/components/Board'; // Pastikan ekspor default di Board.tsx
-import Footer from '@/components/Footer'; // Pastikan ekspor default di Footer.tsx
-import Header from '@/components/Header'; // Pastikan ekspor default di Header.tsx
+import Board from '@/components/Board';
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
 import Head from 'next/head';
 import { useDispatch, useSelector } from 'react-redux';
 import { move, setGameId, endGame, resetGame, setActive, updateBoard, addMove, setHighestTile } from '@/store/game';
 import { useCallback, useEffect } from 'react';
-import { useBlockchain } from '@/minikitprovider';
+import { useBlockchain } from '@/providers/minikitprovider'; // Perbaiki path impor
 import { slideBoard, calculateHighestTile } from '@/utils/board';
 
 export default function Home() {
@@ -16,8 +16,12 @@ export default function Home() {
   useEffect(() => {
     const initGame = async () => {
       if (contract && !gameId) {
-        await approvePlayer();
-        await selectMode(false); // Default off-chain
+        try {
+          await approvePlayer();
+          await selectMode(false); // Default off-chain
+        } catch (error) {
+          console.error('Initialization error:', error);
+        }
       }
     };
     initGame();
@@ -45,6 +49,8 @@ export default function Home() {
       dispatch(endGame());
     }
   }, [contract, gameId, isActive, moves, board, dispatch]);
+
+  if (!contract) return <div>Loading...</div>; // Penanganan SSR
 
   return (
     <>
