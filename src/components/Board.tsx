@@ -8,7 +8,7 @@ import { moveAction } from '@/store/action';
 import { type BoardType } from '@/utils/board';
 import { type Animation, AnimationType } from '@/types/Animations';
 import Overlay from './Overlay';
-import { useBlockchain } from '@/minikitprovider'; // Perbaiki path impor dari '@/src/minikitprovider' ke '@/minikitprovider'
+import { useBlockchain } from '@/minikitprovider'; // Perbaiki dari '@/src/minikitprovider'
 
 const Board = () => {
   const dispatch = useAppDispatch();
