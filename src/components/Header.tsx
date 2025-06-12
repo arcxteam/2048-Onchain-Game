@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Control from './Control';
 import useAppSelector from '@/hooks/useAppSelector';
 import React, { useEffect, useState } from 'react';
 import { useBlockchain } from '@/providers/minikitprovider';
@@ -7,53 +6,53 @@ import { useBlockchain } from '@/providers/minikitprovider';
 const Header = () => {
   const score = useAppSelector((state) => state.app.score);
   const best = useAppSelector((state) => state.app.best);
-  const { contract, connectWallet } = useBlockchain(); // Tambah connectWallet
+  const { connectWallet, isConnected, errorMessage } = useBlockchain();
   const [playerId, setPlayerId] = useState<string | null>(null);
 
   useEffect(() => {
     const getPlayerId = async () => {
-      if (contract && window.ethereum) {
+      if (window.ethereum && isConnected) {
         try {
           const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          setPlayerId(accounts?.[0] || 'Not Connected');
+          setPlayerId(accounts?.[0] || null);
         } catch (error) {
-          setPlayerId('Not Connected');
+          setPlayerId(null);
         }
       }
     };
-    getPlayerId();
+    if (isConnected) getPlayerId();
     window.ethereum?.on('accountsChanged', getPlayerId);
     return () => window.ethereum?.removeListener('accountsChanged', getPlayerId);
-  }, [contract]);
+  }, [isConnected]);
 
   return (
-    <>
-      <div className="flex justify-between align-middle">
-        <div className="grid grid-cols-1 items-center gap-x-3">
-          <Image src="/2048-color.png" width={300} height={300} alt="logo" />
-          <button
-            onClick={connectWallet}
-            className="ml-4 bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            {playerId ? 'Connected' : 'Connect Wallet'}
-          </button>
+    <div className="flex justify-between align-middle p-4">
+      <div className="flex items-center gap-4">
+        <Image src="/2048-color.png" width={100} height={100} alt="logo" />
+        <button
+          onClick={connectWallet}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+          disabled={isConnected}
+        >
+          {isConnected ? 'Connected' : 'Connect Wallet'}
+        </button>
+        {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+      </div>
+      <div className="flex gap-5">
+        <div className="flex gap-x-2 rounded-md bg-black p-3 text-center font-bold text-[#ff833b]">
+          <div className="font-bold uppercase">Score: </div>
+          <div>{score}</div>
         </div>
-        <div className="flex gap-5">
-          <div className="m-auto flex gap-x-2 rounded-md bg-black p-3 text-center font-bold text-[#ff833b]">
-            <div className="font-bold uppercase">Score: </div>
-            <div>{score}</div>
-          </div>
-          <div className="m-auto flex gap-x-2 rounded-md border-2 bg-black p-3 text-center font-bold text-[#47e94f]">
-            <div className="font-bold uppercase">Best: </div>
-            <div>{best}</div>
-          </div>
-          <div className="m-auto flex gap-x-2 rounded-md bg-black p-3 text-center font-bold text-white">
-            <div className="font-bold uppercase">Wallet: </div>
-            <div>{playerId ? `${playerId.slice(0, 6)}...${playerId.slice(-4)}` : 'Not Connected'}</div>
-          </div>
+        <div className="flex gap-x-2 rounded-md border-2 bg-black p-3 text-center font-bold text-[#47e94f]">
+          <div className="font-bold uppercase">Best: </div>
+          <div>{best}</div>
+        </div>
+        <div className="flex gap-x-2 rounded-md bg-black p-3 text-center font-bold text-white">
+          <div className="font-bold uppercase">Wallet: </div>
+          <div>{playerId ? `${playerId.slice(0, 6)}...${playerId.slice(-4)}` : 'Not Connected'}</div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
