@@ -18,44 +18,60 @@ export const BlockchainProvider = ({ children }) => {
   useEffect(() => {
     const loadAbi = async () => {
       try {
-        const response = await fetch('/api/ABI.json');
+        const response = await fetch('/api/abi'); // Ubah ke endpoint /api/abi
+        if (!response.ok) throw new Error('Failed to fetch ABI');
         const abiData = await response.json();
         setAbi(abiData);
       } catch (error) {
-        console.error('Failed to load ABI.json:', error);
+        console.error('Failed to load ABI:', error);
       }
     };
     loadAbi();
   }, []);
 
   const switchNetwork = async (network: string) => {
-    await window.ethereum?.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: ethers.utils.hexValue(networkConfigs[network].chainId) }],
-    });
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    setContract(new ethers.Contract(contractAddress, abi, signer));
+    try {
+      const config = networkConfigs[network];
+      if (!config) throw new Error(`No configuration for network: ${network}`);
+
+      await window.ethereum?.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: `0x${config.chainId.toString(16)}` }], // Konversi chainId ke hex
+      });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      setContract(new ethers.Contract(contractAddress, abi, signer));
+    } catch (error) {
+      console.error('Error switching network:', error);
+    }
   };
 
   const approvePlayer = async () => {
     if (contract && !isApproved) {
-      const tx = await contract.approvePlayer();
-      await tx.wait();
-      setIsApproved(true);
+      try {
+        const tx = await contract.approvePlayer();
+        await tx.wait();
+        setIsApproved(true);
+      } catch (error) {
+        console.error('Error approving player:', error);
+      }
     }
   };
 
-  const selectMode = async (isOnchain: boolean) => {
+  const selectMode = async (isOnChain: boolean) => {
     if (contract && isApproved) {
-      const tx = await contract.selectMode(isOnchain);
-      await tx.wait();
-      const initialBoard = [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-      const initialMoves = [0, 1, 2];
-      const gameId = ethers.utils.formatBytes32String(`game-${Date.now()}`);
-      const startTx = await contract.startGame(gameId, [initialBoard[0], 0, 0, 0], initialMoves);
-      await startTx.wait();
-      console.log('Game started with ID:', gameId);
+      try {
+        const tx = await contract.selectMode(isOnChain);
+        await tx.wait();
+        const initialBoard = [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        const initialMoves = [0, 1, 2];
+        const gameId = ethers.utils.formatBytes32String(`game-${Date.now()}`);
+        const txStart = await contract.startGame(gameId, [initialBoard[0], 0, 0, 0], initialMoves);
+        await txStart.wait();
+        console.log('Game started with ID:', gameId);
+      } catch (error) {
+        console.error('Error selecting mode:', error);
+      }
     }
   };
 
