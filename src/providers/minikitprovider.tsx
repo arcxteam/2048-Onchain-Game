@@ -8,17 +8,19 @@ const BlockchainContext = createContext<{
   contract: ethers.Contract | null;
   approvePlayer: () => Promise<void>;
   selectMode: (isOnchain: boolean) => Promise<void>;
+  connectWallet: () => Promise<void>;
 } | null>(null);
 
 export const BlockchainProvider = ({ children }) => {
   const [contract, setContract] = useState<ethers.Contract | null>(null);
   const [isApproved, setIsApproved] = useState(false);
   const [abi, setAbi] = useState<any[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const loadAbi = async () => {
       try {
-        const response = await fetch('/api/abi'); // Ubah ke endpoint /api/abi
+        const response = await fetch('/api/abi');
         if (!response.ok) throw new Error('Failed to fetch ABI');
         const abiData = await response.json();
         setAbi(abiData);
@@ -36,13 +38,26 @@ export const BlockchainProvider = ({ children }) => {
 
       await window.ethereum?.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${config.chainId.toString(16)}` }], // Konversi chainId ke hex
+        params: [{ chainId: `0x${config.chainId.toString(16)}` }],
       });
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       setContract(new ethers.Contract(contractAddress, abi, signer));
     } catch (error) {
       console.error('Error switching network:', error);
+    }
+  };
+
+  const connectWallet = async () => {
+    try {
+      if (window.ethereum) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        setIsConnected(true);
+        await switchNetwork('0g-testnet');
+        await approvePlayer();
+      }
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
     }
   };
 
@@ -58,10 +73,10 @@ export const BlockchainProvider = ({ children }) => {
     }
   };
 
-  const selectMode = async (isOnChain: boolean) => {
+  const selectMode = async (isOnchain: boolean) => {
     if (contract && isApproved) {
       try {
-        const tx = await contract.selectMode(isOnChain);
+        const tx = await contract.selectMode(isOnchain);
         await tx.wait();
         const initialBoard = [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         const initialMoves = [0, 1, 2];
@@ -77,16 +92,16 @@ export const BlockchainProvider = ({ children }) => {
 
   useEffect(() => {
     const init = async () => {
-      if (window.ethereum) {
+      if (window.ethereum && isConnected) {
         await switchNetwork('0g-testnet');
         await approvePlayer();
       }
     };
     init();
-  }, []);
+  }, [isConnected]);
 
   return (
-    <BlockchainContext.Provider value={{ contract, approvePlayer, selectMode }}>
+    <BlockchainContext.Provider value={{ contract, approvePlayer, selectMode, connectWallet }}>
       {children}
     </BlockchainContext.Provider>
   );
