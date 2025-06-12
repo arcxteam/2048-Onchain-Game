@@ -5,7 +5,7 @@ import Head from 'next/head';
 import { useDispatch, useSelector } from 'react-redux';
 import { move, setGameId, endGame, resetGame, setActive, updateBoard, addMove, setHighestTile } from '@/store/game';
 import { useCallback, useEffect } from 'react';
-import { useBlockchain } from '@/providers/minikitprovider'; // Perbaiki path impor
+import { useBlockchain } from '@/providers/minikitprovider';
 import { slideBoard, calculateHighestTile } from '@/utils/board';
 
 export default function Home() {
@@ -41,16 +41,20 @@ export default function Home() {
 
   const handleGameOver = useCallback(async () => {
     if (contract && gameId && isActive) {
-      if (moves.length > 0) {
-        const resultBoards = moves.map(() => board[0]);
-        await contract.submitBatchMoves(gameId, moves, resultBoards);
+      try {
+        if (moves.length > 0) {
+          const resultBoards = moves.map(() => board[0]);
+          await contract.submitBatchMoves(gameId, moves, resultBoards);
+        }
+        await contract.endGame(gameId);
+        dispatch(endGame());
+      } catch (error) {
+        console.error('Game over error:', error);
       }
-      await contract.endGame(gameId);
-      dispatch(endGame());
     }
   }, [contract, gameId, isActive, moves, board, dispatch]);
 
-  if (!contract) return <div>Loading...</div>; // Penanganan SSR
+  if (!contract) return <div>Loading...</div>;
 
   return (
     <>
