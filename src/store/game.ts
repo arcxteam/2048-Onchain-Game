@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { type Animation } from '@/types/Animations';
 import { type Direction } from '@/types/Direction';
-import { initializeBoard, type BoardType, updateBoard, movePossible, calculateHighestTile, slideBoard } from '@/utils/board';
+import { initializeBoard, type BoardType, movePossible, calculateHighestTile, slideBoard, updateBoard as updateBoardUtil } from '@/utils/board'; // Aliaskan updateBoard menjadi updateBoardUtil
 
 export interface GameState {
   /** Board size. Currently always 4. */
@@ -63,7 +63,7 @@ const gameSlice = createSlice({
     updateBoard: (state, action) => {
       state.board = action.payload;
       state.highestTile = calculateHighestTile(action.payload);
-      state.animations = []; // Reset animations, every refrehs by action MOVE
+      state.animations = []; // Reset animations, every refresh by action MOVE
     },
     addMove: (state, action) => { state.moves.push(action.payload); },
     setActive: (state, action) => { state.isActive = action.payload; },
@@ -72,7 +72,7 @@ const gameSlice = createSlice({
       reducer(state, action) {
         if (state.defeat) return;
         const direction = action.payload.direction as Direction;
-        const update = updateBoard(state.board, direction);
+        const update = updateBoardUtil(state.board, direction); // Gunakan updateBoardUtil
         state.previousBoard = [...state.board];
         state.board = update.board;
         state.score += update.scoreIncrease || 0;
