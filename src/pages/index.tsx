@@ -5,7 +5,7 @@ import Head from 'next/head';
 import { useDispatch, useSelector } from 'react-redux';
 import { move, setGameId, endGame, resetGame, setActive, updateBoard, addMove, setHighestTile } from '@/store/game';
 import { useCallback, useEffect } from 'react';
-import { useBlockchain } from '@/src/minikitprovider';
+import { useBlockchain } from '@/minikitprovider';
 import { slideBoard, calculateHighestTile } from '@/utils/board';
 
 export default function Home() {
