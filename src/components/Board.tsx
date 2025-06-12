@@ -8,7 +8,7 @@ import { moveAction } from '@/store/action';
 import { type BoardType } from '@/utils/board';
 import { type Animation, AnimationType } from '@/types/Animations';
 import Overlay from './Overlay';
-import { useBlockchain } from '@/src/minikitprovider'; // Impor useBlockchain
+import { useBlockchain } from '@/minikitprovider'; // Perbaiki path impor dari '@/src/minikitprovider' ke '@/minikitprovider'
 
 const Board = () => {
   const dispatch = useAppDispatch();
@@ -21,13 +21,11 @@ const Board = () => {
   const onMove = useCallback(
     (direction: Direction) => {
       if (isActive && gameId && contract) {
-        dispatch(moveAction(direction)); // Perbarui state lokal dan animasi
+        dispatch(moveAction(direction));
         if (mode === 'onchain') {
-          // Untuk mode on-chain, eksekusi transaksi jika ada execute
           moveAction(direction).execute?.(contract, gameId, board).catch(console.error);
         } else {
-          // Untuk mode off-chain, simpan gerakan
-          dispatch(addMove(direction)); // Pastikan addMove diimpor dari store/game
+          dispatch(addMove(direction));
         }
       }
     },
