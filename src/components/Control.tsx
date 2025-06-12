@@ -1,6 +1,6 @@
 import useAppDispatch from '@/hooks/useAppDispatch';
 import useAppSelector from '@/hooks/useAppSelector';
-import { resetAction } from '@/store/action';
+import { resetGame } from '@/store/game'; // Ubah dari resetAction ke resetGame
 import React from 'react';
 import { useCallback } from 'react';
 
@@ -8,12 +8,12 @@ const Control = () => {
   const dispatch = useAppDispatch();
   const size = useAppSelector((state) => state.app.boardSize);
   const reset = useCallback(
-    () => dispatch(resetAction(size)),
-    [dispatch, size],
+    () => dispatch(resetGame()), // Gunakan resetGame dari store/game
+    [dispatch],
   );
   return (
     <button
-      onClick={() => dispatch(reset())}
+      onClick={reset} // Ubah dari dispatch(reset()) ke reset
       className="w-full text-[#47e94f] bg-black px-16 py-4"
     >
       New Game
