@@ -18,8 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "types": ["@types/web3", "@types/ethers"]
+    }
   },
   "include": [".eslintrc.cjs", "next-env.d.ts", "**/*.cjs", "**/*.mjs"],
   "exclude": ["node_modules"]
