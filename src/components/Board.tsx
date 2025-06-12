@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-
 import Tile from './Tile';
 import useAppDispatch from '@/hooks/useAppDispatch';
 import useAppSelector from '@/hooks/useAppSelector';
@@ -9,23 +8,33 @@ import { moveAction } from '@/store/action';
 import { type BoardType } from '@/utils/board';
 import { type Animation, AnimationType } from '@/types/Animations';
 import Overlay from './Overlay';
+import { useBlockchain } from '@/src/minikitprovider'; // Impor useBlockchain
 
 const Board = () => {
   const dispatch = useAppDispatch();
-  const board = useAppSelector((state) => state.app.board);
-  const boardSize = useAppSelector((state) => state.app.boardSize);
-  const animations = useAppSelector((state) => state.app.animations);
+  const { board, boardSize, animations, isActive, gameId, mode } = useAppSelector((state) => state.app);
+  const { contract } = useBlockchain();
   const startPointerLocation = useRef<Point>();
   const currentPointerLocation = useRef<Point>();
-
   const animationDuration = 180;
 
   const onMove = useCallback(
-    (direction: Direction) => dispatch(moveAction(direction)),
-    [dispatch],
+    (direction: Direction) => {
+      if (isActive && gameId && contract) {
+        dispatch(moveAction(direction)); // Perbarui state lokal dan animasi
+        if (mode === 'onchain') {
+          // Untuk mode on-chain, eksekusi transaksi jika ada execute
+          moveAction(direction).execute?.(contract, gameId, board).catch(console.error);
+        } else {
+          // Untuk mode off-chain, simpan gerakan
+          dispatch(addMove(direction)); // Pastikan addMove diimpor dari store/game
+        }
+      }
+    },
+    [dispatch, isActive, gameId, contract, mode, board],
   );
 
-  const [renderedBoard, setRenderedBoard] = useState(board);
+  const [renderedBoard, setRenderedBoard] = useState<BoardType>(board);
   const [renderedAnimations, setRenderedAnimations] = useState<Animation[]>([]);
   const lastBoard = useRef<BoardType>([...board]);
   const animationTimeout = useRef<number>();
@@ -33,47 +42,26 @@ const Board = () => {
   useEffect(() => {
     const keydownListener = (e: KeyboardEvent) => {
       e.preventDefault();
-
       switch (e.key) {
-        case 'ArrowDown':
-          onMove(Direction.DOWN);
-          break;
-        case 'ArrowUp':
-          onMove(Direction.UP);
-          break;
-        case 'ArrowLeft':
-          onMove(Direction.LEFT);
-          break;
-        case 'ArrowRight':
-          onMove(Direction.RIGHT);
-          break;
+        case 'ArrowDown': onMove(Direction.DOWN); break;
+        case 'ArrowUp': onMove(Direction.UP); break;
+        case 'ArrowLeft': onMove(Direction.LEFT); break;
+        case 'ArrowRight': onMove(Direction.RIGHT); break;
       }
     };
-
     window.addEventListener('keydown', keydownListener);
-
-    return () => {
-      window.removeEventListener('keydown', keydownListener);
-    };
+    return () => window.removeEventListener('keydown', keydownListener);
   }, [onMove]);
 
   const finishPointer = useCallback(
     (a: Point, b: Point) => {
       const distance = Math.sqrt((b.y - a.y) ** 2 + (b.x - a.x) ** 2);
-      if (distance < 20) {
-        return;
-      }
-
+      if (distance < 20) return;
       const angle = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
-      if (angle < -135 || angle > 135) {
-        onMove(Direction.LEFT);
-      } else if (angle < -45) {
-        onMove(Direction.UP);
-      } else if (angle < 45) {
-        onMove(Direction.RIGHT);
-      } else if (angle < 135) {
-        onMove(Direction.DOWN);
-      }
+      if (angle < -135 || angle > 135) onMove(Direction.LEFT);
+      else if (angle < -45) onMove(Direction.UP);
+      else if (angle < 45) onMove(Direction.RIGHT);
+      else if (angle < 135) onMove(Direction.DOWN);
     },
     [onMove],
   );
@@ -81,66 +69,39 @@ const Board = () => {
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     const touch = e.touches[0];
-    if (touch) {
-      const point: Point = { x: touch.pageX, y: touch.pageY };
-      startPointerLocation.current = point;
-    }
+    if (touch) startPointerLocation.current = { x: touch.pageX, y: touch.pageY };
   }, []);
   const onTouchMove = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     const touch = e.touches[0];
-    if (touch) {
-      const point: Point = { x: touch.pageX, y: touch.pageY };
-      currentPointerLocation.current = point;
-    }
+    if (touch) currentPointerLocation.current = { x: touch.pageX, y: touch.pageY };
   }, []);
-  const onTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      e.preventDefault();
-      if (startPointerLocation.current && currentPointerLocation.current) {
-        finishPointer(
-          startPointerLocation.current,
-          currentPointerLocation.current,
-        );
-      }
-
-      startPointerLocation.current = undefined;
-      currentPointerLocation.current = undefined;
-    },
-    [finishPointer],
-  );
-
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    if (startPointerLocation.current && currentPointerLocation.current)
+      finishPointer(startPointerLocation.current, currentPointerLocation.current);
+    startPointerLocation.current = undefined;
+    currentPointerLocation.current = undefined;
+  }, [finishPointer]);
   const onMouseStart = useCallback((e: React.MouseEvent) => {
-    const point: Point = { x: e.pageX, y: e.pageY };
-    startPointerLocation.current = point;
+    startPointerLocation.current = { x: e.pageX, y: e.pageY };
   }, []);
-  const onMouseEnd = useCallback(
-    (e: React.MouseEvent) => {
-      if (startPointerLocation.current) {
-        finishPointer(startPointerLocation.current, { x: e.pageX, y: e.pageY });
-        startPointerLocation.current = undefined;
-      }
-    },
-    [finishPointer],
-  );
+  const onMouseEnd = useCallback((e: React.MouseEvent) => {
+    if (startPointerLocation.current)
+      finishPointer(startPointerLocation.current, { x: e.pageX, y: e.pageY });
+    startPointerLocation.current = undefined;
+  }, [finishPointer]);
 
   useEffect(() => {
     if (!animations) {
       setRenderedBoard([...board]);
       return;
     }
-
-    const moveAnimations = animations.filter(
-      (animation) => animation.type === AnimationType.MOVE,
-    );
-    const otherAnimations = animations.filter(
-      (animation) => animation.type !== AnimationType.MOVE,
-    );
-
+    const moveAnimations = animations.filter((a) => a.type === AnimationType.MOVE);
+    const otherAnimations = animations.filter((a) => a.type !== AnimationType.MOVE);
     if (moveAnimations.length > 0) {
       setRenderedBoard(lastBoard.current);
       setRenderedAnimations(moveAnimations);
-
       clearTimeout(animationTimeout.current);
       animationTimeout.current = setTimeout(() => {
         setRenderedAnimations(otherAnimations);
@@ -150,32 +111,26 @@ const Board = () => {
       setRenderedAnimations(otherAnimations);
       setRenderedBoard([...board]);
     }
-
     lastBoard.current = [...board];
   }, [animations, board, setRenderedBoard, setRenderedAnimations]);
 
   return (
     <div className="relative">
       <div
-        className={`grid touch-none select-none gap-2.5 rounded-md border-2 bg-black p-2.5`}
+        className="grid touch-none select-none gap-2.5 rounded-md border-2 bg-black p-2.5"
         onMouseDown={onMouseStart}
         onMouseUp={onMouseEnd}
         onMouseLeave={onMouseEnd}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        // Below was written instead of inline style because issues with the grid columns.
-        style={{
-          gridTemplateColumns: `repeat(${boardSize}, 1fr)`,
-        }}
+        style={{ gridTemplateColumns: `repeat(${boardSize}, 1fr)` }}
       >
         {renderedBoard.map((value, i) => (
           <Tile
             value={value}
             key={i}
-            animations={renderedAnimations?.filter(
-              (animation) => animation.index === i,
-            )}
+            animations={renderedAnimations?.filter((a) => a.index === i)}
           />
         ))}
       </div>
