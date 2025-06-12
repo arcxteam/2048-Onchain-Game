@@ -3,7 +3,7 @@ import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
-import { BlockchainProvider } from '@/minikitprovider'; // Perbaiki dari '@/src/minikitprovider'
+import { BlockchainProvider } from '@/providers/minikitprovider'; // Perbaiki path impor
 
 export default function App({ Component, pageProps }: AppProps) {
   const [flag, setFlag] = useState(false);
