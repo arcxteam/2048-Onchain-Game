@@ -1,9 +1,9 @@
-// src/minikit-provider.tsx
+// src/minikitprovider.tsx
 'use client';
 
 import { ethers } from 'ethers';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { networkConfigs, contractAddress, abi } from '../config/networks';
+import { networkConfigs, contractAddress, abi } from '@/config/networks'; // Perbaiki path dari '../config/networks' ke '@/config/networks'
 import ABI from './api/ABI.json';
 
 const BlockchainContext = createContext<{
@@ -38,13 +38,11 @@ export const BlockchainProvider = ({ children }) => {
     if (contract && isApproved) {
       const tx = await contract.selectMode(isOnchain);
       await tx.wait();
-      // Next to start game after chosing mode
       const initialBoard = [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
       const initialMoves = [0, 1, 2];
       const gameId = ethers.utils.formatBytes32String(`game-${Date.now()}`);
       const startTx = await contract.startGame(gameId, [initialBoard[0], 0, 0, 0], initialMoves);
       await startTx.wait();
-      // Dispatch to Redux for gameId & board
       console.log('Game started with ID:', gameId);
     }
   };
@@ -52,8 +50,8 @@ export const BlockchainProvider = ({ children }) => {
   useEffect(() => {
     const init = async () => {
       if (window.ethereum) {
-        await switchNetwork('0g-testnet'); // Default ke 0G Testnet
-        await approvePlayer(); // Approval otomatis
+        await switchNetwork('0g-testnet');
+        await approvePlayer();
       }
     };
     init();
