@@ -3,8 +3,8 @@ export const networkConfigs = {
     chainId: 16601,
     rpcUrl: 'https://evmrpc-testnet.0g.ai',
   },
-  // add other network (sepolia, holesky)
+  // Tambahan jaringan EVM lainnya jika diperlukan
+  // 'sepolia': { chainId: 11155111, rpcUrl: 'https://rpc.sepolia.org' },
+  // 'holesky': { chainId: 17000, rpcUrl: 'https://rpc.holesky.ethpandaops.io' },
 };
-
-export const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0xdF0d5abC614EF45C4bCEA121624644523BAc80b7';
-export const abi = []; // Placeholder, akan diimpor dari src/pages/api/ABI.json di minikitprovider.tsx
+export const contractAddress = '0xdF0d5abC614EF45C4bCEA121624644523BAc80b7';
