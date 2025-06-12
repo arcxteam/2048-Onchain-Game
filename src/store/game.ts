@@ -1,15 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { ActionType } from '@/types/ActionType';
 import { type Animation } from '@/types/Animations';
 import { type Direction } from '@/types/Direction';
-import { type ActionModel } from '@/types/Models';
-import {
-  initializeBoard,
-  type BoardType,
-  updateBoard,
-  movePossible,
-} from '@/utils/board';
-import { getStoredData, setStoredData } from '@/utils/localStorage';
+import { initializeBoard, type BoardType, updateBoard, movePossible, calculateHighestTile, slideBoard } from '@/utils/board';
 
 export interface GameState {
   /** Board size. Currently always 4. */
@@ -18,6 +10,12 @@ export interface GameState {
   board: BoardType;
   /** Previous board. */
   previousBoard?: BoardType;
+  /** Game ID from smart contract. */
+  gameId: string | null;
+  /** List of moves for off-chain mode. */
+  moves: number[];
+  /** Is game active? */
+  isActive: boolean;
   /** Was 2048 tile found? */
   victory: boolean;
   /** Is game over? */
@@ -34,117 +32,82 @@ export interface GameState {
   moveId?: string;
   /** Animations after last update. */
   animations?: Animation[];
-  /** Game ID from blockchain. */
-  gameId: string | null;
-  /** List of moves for off-chain mode. */
-  moves: number[];
-  /** Is the game active? */
-  isActive: boolean;
   /** Game mode (onchain or offchain). */
   mode: 'onchain' | 'offchain';
+  /** Highest tile achieved. */
+  highestTile: number;
 }
 
-const storedData = getStoredData();
+const initialState: GameState = {
+  boardSize: 4,
+  board: initializeBoard(4).board,
+  gameId: null,
+  moves: [],
+  isActive: false,
+  victory: false,
+  defeat: false,
+  victoryDismissed: false,
+  score: 0,
+  best: 0,
+  moveId: new Date().getTime().toString(),
+  animations: initializeBoard(4).animations,
+  mode: 'offchain', // Default mode
+  highestTile: 0,
+};
 
-function initializeState(): GameState {
-  const update = initializeBoard(4);
-  return {
-    boardSize: storedData.boardSize || 4,
-    board: storedData.board || update.board,
-    previousBoard: undefined,
-    defeat: storedData.defeat || false,
-    victory: false,
-    victoryDismissed: storedData.victoryDismissed || false,
-    score: storedData.score || 0,
-    scoreIncrease: undefined,
-    best: storedData.best || 0,
-    moveId: new Date().getTime().toString(),
-    animations: update.animations,
-    gameId: null,
-    moves: [],
-    isActive: false,
-    mode: 'offchain', // Default mode
-  };
-}
+const gameSlice = createSlice({
+  name: 'app',
+  initialState,
+  reducers: {
+    setGameId: (state, action) => { state.gameId = action.payload; },
+    updateBoard: (state, action) => {
+      state.board = action.payload;
+      state.highestTile = calculateHighestTile(action.payload);
+      state.animations = []; // Reset animations, every refrehs by action MOVE
+    },
+    addMove: (state, action) => { state.moves.push(action.payload); },
+    setActive: (state, action) => { state.isActive = action.payload; },
+    setMode: (state, action) => { state.mode = action.payload; },
+    move: {
+      reducer(state, action) {
+        if (state.defeat) return;
+        const direction = action.payload.direction as Direction;
+        const update = updateBoard(state.board, direction);
+        state.previousBoard = [...state.board];
+        state.board = update.board;
+        state.score += update.scoreIncrease || 0;
+        state.animations = update.animations || [];
+        state.scoreIncrease = update.scoreIncrease;
+        state.moveId = new Date().getTime().toString();
+        state.highestTile = calculateHighestTile(state.board);
+        state.defeat = !movePossible(state.board);
+        state.victory = state.highestTile >= 11; // 2048 = 2^11
+        if (state.score > state.best) state.best = state.score;
+      },
+      prepare(direction: Direction, execute?: (contract: ethers.Contract, gameId: string) => Promise<void>) {
+        return { payload: { direction, execute } };
+      },
+    },
+    endGame: (state) => {
+      state.isActive = false;
+      state.moves = []; // Reset moves after game over
+    },
+    resetGame: (state) => {
+      state.gameId = null;
+      state.board = initializeBoard(4).board;
+      state.moves = [];
+      state.isActive = false;
+      state.victory = false;
+      state.defeat = false;
+      state.victoryDismissed = false;
+      state.score = 0;
+      state.best = 0;
+      state.moveId = new Date().getTime().toString();
+      state.animations = initializeBoard(4).animations;
+      state.highestTile = 0;
+    },
+  },
+});
 
-const initialState: GameState = initializeState();
-
-function gameReducer(state = initialState, action: ActionModel) {
-  const newState = { ...state };
-  switch (action.type) {
-    case ActionType.RESET:
-      {
-        const size = action.value || newState.boardSize;
-        const update = initializeBoard(size);
-        newState.boardSize = size;
-        newState.board = update.board;
-        newState.score = 0;
-        newState.animations = update.animations;
-        newState.previousBoard = undefined;
-        newState.victory = false;
-        newState.victoryDismissed = false;
-        newState.gameId = null;
-        newState.moves = [];
-        newState.isActive = false;
-      }
-      break;
-    case ActionType.MOVE:
-      {
-        if (newState.defeat) {
-          break;
-        }
-        const direction = action.value as Direction;
-        const update = updateBoard(newState.board, direction);
-        newState.previousBoard = [...newState.board];
-        newState.board = update.board;
-        newState.score += update.scoreIncrease || 0;
-        newState.animations = update.animations;
-        newState.scoreIncrease = update.scoreIncrease;
-        newState.moveId = new Date().getTime().toString();
-        if (newState.mode === 'offchain' && newState.isActive) {
-          newState.moves.push(direction); // save move for batch
-        }
-      }
-      break;
-    case ActionType.UNDO:
-      if (!newState.previousBoard) {
-        break;
-      }
-      newState.board = newState.previousBoard;
-      newState.previousBoard = undefined;
-      if (newState.scoreIncrease) {
-        newState.score -= newState.scoreIncrease;
-      }
-      if (newState.mode === 'offchain') {
-        newState.moves.pop(); // cancel moving in the end
-      }
-      break;
-    case ActionType.DISMISS:
-      newState.victoryDismissed = true;
-      break;
-    // Tambahan untuk blockchain
-    case 'SET_GAME_ID':
-      newState.gameId = action.value as string;
-      break;
-    case 'SET_ACTIVE':
-      newState.isActive = action.value as boolean;
-      break;
-    case 'SET_MODE':
-      newState.mode = action.value as 'onchain' | 'offchain';
-      break;
-    case 'END_GAME':
-      newState.isActive = false;
-      break;
-    default:
-      return state;
-  }
-  if (newState.score > newState.best) {
-    newState.best = newState.score;
-  }
-  newState.defeat = !movePossible(newState.board);
-  newState.victory = !!newState.board.find((value) => value === 2048);
-  setStoredData(newState);
-  return newState;
-}
-
-export default gameReducer;
+export const { setGameId, updateBoard, addMove, setActive, setMode, move, endGame, resetGame } = gameSlice.actions;
+export default gameSlice.reducer;
