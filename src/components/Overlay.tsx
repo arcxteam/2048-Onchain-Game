@@ -1,8 +1,8 @@
 import useAppDispatch from '@/hooks/useAppDispatch';
 import useAppSelector from '@/hooks/useAppSelector';
 import { dismissAction, resetGame } from '@/store/game'; // Ubah resetAction ke resetGame
-import { useCallback } from 'react';
-import { useBlockchain } from '@/src/minikitprovider'; // Tambahkan untuk klaim NFT
+import { useCallback, useEffect } from 'react';
+import { useBlockchain } from '@/minikitprovider'; // Perbaiki path impor
 
 const Overlay: React.FC = () => {
   const dispatch = useAppDispatch();
