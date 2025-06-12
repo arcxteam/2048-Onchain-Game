@@ -3,6 +3,7 @@ import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
+import { BlockchainProvider } from '@/src/minikitprovider';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [flag, setFlag] = useState(false);
@@ -12,7 +13,9 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     flag === true && (
       <Provider store={store}>
-        <Component {...pageProps} />
+        <BlockchainProvider>
+          <Component {...pageProps} />
+        </BlockchainProvider>
       </Provider>
     )
   );
