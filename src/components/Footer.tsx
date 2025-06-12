@@ -1,6 +1,7 @@
-import { useBlockchain } from '@/minikitprovider'; // Perbaiki dari '@/src/minikitprovider'
+import { useBlockchain } from '@/providers/minikitprovider'; // Perbaiki path impor
 import { useCallback, useEffect, useState } from 'react';
 import Control from './Control';
+import { ethers } from 'ethers';
 
 const Footer: React.FC = () => {
   const { contract } = useBlockchain();
