@@ -1,74 +1,62 @@
-import {
-  MiniKit,
-  tokenToDecimals,
-  Tokens,
-  PayCommandInput,
-  ResponseEvent,
-  MiniAppPaymentPayload,
-} from '@worldcoin/minikit-js';
-import { useEffect } from 'react';
+import { useBlockchain } from '@/src/minikitprovider';
+import { useCallback, useEffect, useState } from 'react';
 import Control from './Control';
 
 const Footer: React.FC = () => {
+  const { contract } = useBlockchain();
+  const [mode, setMode] = useState<'onchain' | 'offchain' | null>(null);
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+
   useEffect(() => {
-    if (!MiniKit.isInstalled()) {
-      return;
-    }
-
-    MiniKit.subscribe(
-      ResponseEvent.MiniAppPayment,
-      async (payload: MiniAppPaymentPayload) => {
-        if (payload.status == 'success') {
-          const payment = await fetch(`/api/confirmpayment`, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-          });
-          const json = await payment.json();
-          if (json.success) {
-            console.log('worked!');
-          }
-        }
-      },
-    );
-
-    return () => {
-      MiniKit.unsubscribe(ResponseEvent.MiniAppPayment);
+    const checkWallet = async () => {
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        setIsWalletConnected(accounts.length > 0);
+      }
     };
+    checkWallet();
+    window.ethereum?.on('accountsChanged', checkWallet);
+    return () => window.ethereum?.removeListener('accountsChanged', checkWallet);
   }, []);
 
-  const startPayment = async () => {
-    const res = await fetch(`/api/startpayment`);
-
-    const payload: PayCommandInput = {
-      reference: await res.text(),
-      to: '0x23253559632Ed2C8DfB6b6e10e85D03C871c7d68',
-      tokens: [
-        {
-          symbol: Tokens.WLD,
-          token_amount: tokenToDecimals(1, Tokens.WLD).toString(),
-        },
-        {
-          symbol: Tokens.USDCE,
-          token_amount: tokenToDecimals(3, Tokens.USDCE).toString(),
-        },
-      ],
-      description: 'Select Mode',
-    };
-
-    if (MiniKit.isInstalled()) {
-      MiniKit.commands.pay(payload);
+  const handleModeSelect = useCallback(() => {
+    if (!isWalletConnected) {
+      alert('Please connect your wallet first!');
+      return;
     }
-  };
+    if (!contract) {
+      alert('Contract not initialized. Please try again.');
+      return;
+    }
+    const selectedMode = prompt('Select mode (onchain/offchain):');
+    if (selectedMode === 'onchain' || selectedMode === 'offchain') {
+      setMode(selectedMode);
+      // Lanjut ke start game setelah memilih mode
+      const startGame = async () => {
+        const initialBoard = [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        const initialMoves = [0, 1, 2];
+        const gameId = ethers.utils.formatBytes32String(`game-${Date.now()}`);
+        const tx = await contract.startGame(gameId, [initialBoard[0], 0, 0, 0], initialMoves);
+        await tx.wait();
+        // Di sini Anda bisa dispatch ke Redux untuk mengatur gameId dan board
+        console.log('Game started with ID:', gameId);
+      };
+      startGame().catch(console.error);
+    } else {
+      alert('Invalid mode! Please select "onchain" or "offchain".');
+    }
+  }, [isWalletConnected, contract]);
 
   return (
     <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#adadad]">
       <div className="mt-2 w-full">
         <Control />
         <button
-          onClick={startPayment}
+          onClick={handleModeSelect}
           className="font-lg mt-2 w-full px-16 py-4"
+          disabled={!isWalletConnected || !!mode}
         >
-          Select Mode - Chain
+          {mode ? `Mode: ${mode}` : 'Select Mode'}
         </button>
       </div>
       <p>
