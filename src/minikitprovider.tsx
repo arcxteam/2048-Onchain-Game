@@ -3,7 +3,7 @@
 import { ethers } from 'ethers';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { networkConfigs, contractAddress, abi } from '@/config/networks';
-import ABI from '../pages/api/ABI.json';
+
 const BlockchainContext = createContext<{
   contract: ethers.Contract | null;
   approvePlayer: () => Promise<void>;
@@ -13,6 +13,20 @@ const BlockchainContext = createContext<{
 export const BlockchainProvider = ({ children }) => {
   const [contract, setContract] = useState<ethers.Contract | null>(null);
   const [isApproved, setIsApproved] = useState(false);
+  const [abi, setAbi] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadAbi = async () => {
+      try {
+        const response = await fetch('/api/ABI.json');
+        const abiData = await response.json();
+        setAbi(abiData);
+      } catch (error) {
+        console.error('Failed to load ABI.json:', error);
+      }
+    };
+    loadAbi();
+  }, []);
 
   const switchNetwork = async (network: string) => {
     await window.ethereum?.request({
@@ -21,7 +35,7 @@ export const BlockchainProvider = ({ children }) => {
     });
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    setContract(new ethers.Contract(contractAddress, ABI, signer));
+    setContract(new ethers.Contract(contractAddress, abi, signer));
   };
 
   const approvePlayer = async () => {
