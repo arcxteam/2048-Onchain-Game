@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Control from './Control';
 import useAppSelector from '@/hooks/useAppSelector';
 import React, { useEffect, useState } from 'react';
-import { useBlockchain } from '@/minikitprovider'; // Perbaiki path impor
+import { useBlockchain } from '@/providers/minikitprovider'; // Perbaiki path impor
 
 const Header = () => {
   const score = useAppSelector((state) => state.app.score);
