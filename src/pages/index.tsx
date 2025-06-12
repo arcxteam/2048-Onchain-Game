@@ -7,54 +7,44 @@ import { move, setGameId, endGame, resetGame, setActive, updateBoard, addMove, s
 import { useCallback, useEffect } from 'react';
 import { useBlockchain } from '@/providers/minikitprovider';
 import { slideBoard, calculateHighestTile } from '@/utils/board';
+import { initializeBoard } from '@/utils/board'; // Untuk inisialisasi papan default
 
 export default function Home() {
   const dispatch = useDispatch();
-  const { gameId, board, moves, isActive, highestTile, defeat, victory } = useSelector((state) => state.app);
-  const { contract, approvePlayer, selectMode } = useBlockchain();
+  const { board, isActive } = useSelector((state) => state.app);
+  const { contract, connectWallet, isConnected, errorMessage } = useBlockchain();
 
+  // Inisialisasi papan default tanpa koneksi wallet
   useEffect(() => {
-    const initGame = async () => {
-      if (contract && !gameId) {
-        try {
-          await approvePlayer();
-          await selectMode(false); // Default off-chain
-        } catch (error) {
-          console.error('Initialization error:', error);
-        }
-      }
-    };
-    initGame();
-  }, [contract, gameId, approvePlayer, selectMode]);
+    if (!board.length) {
+      const { board: initialBoard } = initializeBoard(4);
+      dispatch(updateBoard(initialBoard));
+      dispatch(setActive(true));
+    }
+  }, [dispatch, board]);
 
   const handleMove = useCallback((direction: number) => {
-    if (contract && gameId && isActive) {
+    if (contract && isActive) {
       const newBoard = slideBoard(board, direction);
       dispatch(updateBoard(newBoard));
       dispatch(addMove(direction));
       dispatch(setHighestTile(calculateHighestTile(newBoard)));
-      if (gameId) {
-        contract.play(gameId, direction, newBoard[0]).catch(console.error);
+      if (contract) {
+        contract.play(setGameId, direction, newBoard[0]).catch(console.error);
       }
     }
-  }, [contract, gameId, isActive, board, dispatch]);
+  }, [contract, isActive, board, dispatch]);
 
   const handleGameOver = useCallback(async () => {
-    if (contract && gameId && isActive) {
+    if (contract && isActive) {
       try {
-        if (moves.length > 0) {
-          const resultBoards = moves.map(() => board[0]);
-          await contract.submitBatchMoves(gameId, moves, resultBoards);
-        }
-        await contract.endGame(gameId);
+        await contract.endGame(setGameId);
         dispatch(endGame());
       } catch (error) {
         console.error('Game over error:', error);
       }
     }
-  }, [contract, gameId, isActive, moves, board, dispatch]);
-
-  if (!contract) return <div>Loading...</div>;
+  }, [contract, isActive, dispatch]);
 
   return (
     <>
@@ -65,13 +55,6 @@ export default function Home() {
         <Header />
         <Board onMove={handleMove} />
         <Footer onEndGame={handleGameOver} />
-        {defeat || victory ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <button onClick={() => dispatch(resetGame())} className="bg-green-500 text-white px-4 py-2 rounded">
-              New Game
-            </button>
-          </div>
-        ) : null}
       </main>
     </>
   );
