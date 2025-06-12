@@ -7,4 +7,4 @@ export const networkConfigs = {
 };
 
 export const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '0xdF0d5abC614EF45C4bCEA121624644523BAc80b7';
-export const abi = []; // Placeholder, src/pages/api/ABI.json
+export const abi = []; // Placeholder, akan diimpor dari src/pages/api/ABI.json di minikitprovider.tsx
