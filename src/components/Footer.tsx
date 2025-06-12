@@ -1,4 +1,4 @@
-import { useBlockchain } from '@/src/minikitprovider';
+import { useBlockchain } from '@/minikitprovider'; // Perbaiki dari '@/src/minikitprovider'
 import { useCallback, useEffect, useState } from 'react';
 import Control from './Control';
 
@@ -31,14 +31,12 @@ const Footer: React.FC = () => {
     const selectedMode = prompt('Select mode (onchain/offchain):');
     if (selectedMode === 'onchain' || selectedMode === 'offchain') {
       setMode(selectedMode);
-      // Lanjut ke start game setelah memilih mode
       const startGame = async () => {
         const initialBoard = [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         const initialMoves = [0, 1, 2];
         const gameId = ethers.utils.formatBytes32String(`game-${Date.now()}`);
         const tx = await contract.startGame(gameId, [initialBoard[0], 0, 0, 0], initialMoves);
         await tx.wait();
-        // Di sini Anda bisa dispatch ke Redux untuk mengatur gameId dan board
         console.log('Game started with ID:', gameId);
       };
       startGame().catch(console.error);
