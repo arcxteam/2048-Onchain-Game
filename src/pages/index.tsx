@@ -6,16 +6,22 @@ import { useDispatch, useSelector } from 'react-redux';
 import { move, setGameId, endGame, resetGame, setActive, updateBoard, addMove, setHighestTile } from '@/store/game';
 import { useCallback, useEffect } from 'react';
 import { useWeb3AuthConnect } from '@web3auth/modal/react';
-import { useAccount } from 'wagmi';
+import { useAccount, useContract } from 'wagmi';
 import { initializeBoard, slideBoard, calculateHighestTile } from '@/utils/board';
+import { contractAddress } from '@/config/networks';
+import ABI from '@/pages/api/ABI.json';
 
 export default function Home() {
   const dispatch = useDispatch();
   const { board, isActive } = useSelector((state) => state.app);
   const { connect } = useWeb3AuthConnect();
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  const { data: contract } = useContract({
+    address: contractAddress as `0x${string}`,
+    abi: ABI,
+  });
 
-  // Inisialisasi papan default tanpa koneksi wallet
+  // Inisialisasi papan default
   useEffect(() => {
     if (!board.length) {
       const { board: initialBoard } = initializeBoard(4);
@@ -30,19 +36,22 @@ export default function Home() {
       dispatch(updateBoard(newBoard));
       dispatch(addMove(direction));
       dispatch(setHighestTile(calculateHighestTile(newBoard)));
-      // Panggil kontrak hanya jika terhubung
-      if (isConnected) {
-        // Logika kontrak (perlu disesuaikan dengan Wagmi)
+      if (contract && isConnected) {
+        contract.play(address, direction, newBoard[0]).catch(console.error);
       }
     }
-  }, [isActive, board, dispatch, isConnected]);
+  }, [isActive, board, dispatch, contract, isConnected, address]);
 
   const handleGameOver = useCallback(async () => {
-    if (isConnected && isActive) {
-      // Logika kontrak untuk endGame (perlu disesuaikan)
-      dispatch(endGame());
+    if (contract && isConnected && isActive) {
+      try {
+        await contract.endGame(address);
+        dispatch(endGame());
+      } catch (error) {
+        console.error('Game over error:', error);
+      }
     }
-  }, [isConnected, isActive, dispatch]);
+  }, [contract, isConnected, isActive, dispatch, address]);
 
   return (
     <>
