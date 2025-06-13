@@ -1,24 +1,22 @@
-import { useBlockchain } from '@/providers/minikitprovider'; // Perbaiki path impor
 import { useCallback, useEffect, useState } from 'react';
 import Control from './Control';
+import { useAccount, useContract } from 'wagmi';
+import { contractAddress } from '@/config/networks';
+import ABI from '@/pages/api/ABI.json';
 import { ethers } from 'ethers';
 
 const Footer: React.FC = () => {
-  const { contract } = useBlockchain();
+  const { address } = useAccount();
+  const { data: contract } = useContract({
+    address: contractAddress as `0x${string}`,
+    abi: ABI,
+  });
   const [mode, setMode] = useState<'onchain' | 'offchain' | null>(null);
   const [isWalletConnected, setIsWalletConnected] = useState(false);
 
   useEffect(() => {
-    const checkWallet = async () => {
-      if (window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        setIsWalletConnected(accounts.length > 0);
-      }
-    };
-    checkWallet();
-    window.ethereum?.on('accountsChanged', checkWallet);
-    return () => window.ethereum?.removeListener('accountsChanged', checkWallet);
-  }, []);
+    setIsWalletConnected(!!address);
+  }, [address]);
 
   const handleModeSelect = useCallback(() => {
     if (!isWalletConnected) {
