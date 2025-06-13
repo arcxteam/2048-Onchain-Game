@@ -4,79 +4,73 @@ const ITEM_NAME = '2048_data';
 
 export function getStoredData(): StorageModel {
   if (typeof window !== 'undefined') {
-    if (!localStorage.getItem(ITEM_NAME)) {
-      return {};
-    }
-
-    const model: StorageModel = {};
+    const storedData = localStorage.getItem(ITEM_NAME);
+    if (!storedData) return {};
 
     try {
-      const data = JSON.parse(
-        localStorage.getItem(ITEM_NAME) as string,
-      ) as StorageModel;
+      const data = JSON.parse(storedData) as StorageModel;
 
+      // Validasi struktur data yang diperlukan
+      const requiredFields = ['board', 'boardSize', 'score', 'defeat', 'victoryDismissed'];
+      if (!requiredFields.every(field => Object.hasOwn(data, field))) {
+        throw new Error('Invalid stored data: Missing required fields');
+      }
+
+      // Validasi tipe data
       if (
-        Object.hasOwn(data, 'board') &&
-        Object.hasOwn(data, 'boardSize') &&
-        Object.hasOwn(data, 'score') &&
-        Object.hasOwn(data, 'defeat') &&
-        Object.hasOwn(data, 'victoryDismissed')
+        !Array.isArray(data.board) ||
+        typeof data.boardSize !== 'number' ||
+        data.board.length !== data.boardSize ** 2 ||
+        typeof data.score !== 'number' ||
+        typeof data.defeat !== 'boolean' ||
+        typeof data.victoryDismissed !== 'boolean' ||
+        (data.moves && !Array.isArray(data.moves)) // Validasi opsional untuk moves
       ) {
-        if (
-          Array.isArray(data.board) &&
-          typeof data.boardSize === 'number' &&
-          data.board.length === data.boardSize ** 2 &&
-          typeof data.score === 'number' &&
-          typeof data.defeat === 'boolean' &&
-          typeof data.victoryDismissed === 'boolean'
-        ) {
-          for (const value of data.board) {
-            if (typeof value !== 'number') {
-              throw new Error('Invalid stored data.');
-            }
+        throw new Error('Invalid stored data: Incorrect types');
+      }
 
-            // Make sure the value is a power of 2.
-            if (value !== 0 && Math.log2(value) % 1 !== 0) {
-              throw new Error('Invalid stored data.');
-            }
-          }
-
-          model.board = data.board;
-          model.boardSize = data.boardSize;
-          model.score = data.score;
-          model.defeat = data.defeat;
-          model.victoryDismissed = data.victoryDismissed;
-        } else {
-          throw new Error('Invalid stored data.');
+      // Validasi nilai board (harus 0 atau pangkat 2)
+      for (const value of data.board) {
+        if (typeof value !== 'number') {
+          throw new Error('Invalid stored data: Board values must be numbers');
+        }
+        if (value !== 0 && Math.log2(value) % 1 !== 0) {
+          throw new Error('Invalid stored data: Board values must be powers of 2');
         }
       }
 
-      if (Object.hasOwn(data, 'best')) {
-        if (typeof data.best === 'number') {
-          model.best = data.best;
-        } else {
-          throw new Error('Invalid stored data.');
-        }
+      // Validasi opsional best
+      if (data.best !== undefined && typeof data.best !== 'number') {
+        throw new Error('Invalid stored data: Best must be a number');
       }
-    } catch {
+
+      return {
+        board: [...data.board], // Salin array untuk mencegah mutasi langsung
+        boardSize: data.boardSize,
+        score: data.score,
+        defeat: data.defeat,
+        victoryDismissed: data.victoryDismissed,
+        moves: data.moves ? [...data.moves] : [], // Tambahkan moves jika ada
+        best: data.best,
+      };
+    } catch (error) {
+      console.error('Error parsing stored data:', error);
       localStorage.removeItem(ITEM_NAME);
+      return {};
     }
-    return model;
   }
-
   return {};
 }
 
 export function setStoredData(model: StorageModel) {
-  localStorage.setItem(
-    ITEM_NAME,
-    JSON.stringify({
-      best: model.best,
-      score: model.score,
-      board: model.board,
-      boardSize: model.boardSize,
-      defeat: model.defeat,
-      victoryDismissed: model.victoryDismissed,
-    }),
-  );
+  const dataToStore: StorageModel = {
+    board: model.board ? [...model.board] : [],
+    boardSize: model.boardSize || 4,
+    score: model.score || 0,
+    defeat: model.defeat || false,
+    victoryDismissed: model.victoryDismissed || false,
+    moves: model.moves ? [...model.moves] : [], // Simpan moves untuk mode off-chain
+    best: model.best || 0,
+  };
+  localStorage.setItem(ITEM_NAME, JSON.stringify(dataToStore));
 }
