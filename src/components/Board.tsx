@@ -8,12 +8,18 @@ import { moveAction } from '@/store/action';
 import { type BoardType } from '@/utils/board';
 import { type Animation, AnimationType } from '@/types/Animations';
 import Overlay from './Overlay';
-import { useBlockchain } from '@/providers/minikitprovider'; // Perbaiki path impor
+import { useAccount, useContract } from 'wagmi';
+import { contractAddress } from '@/config/networks';
+import ABI from '@/pages/api/ABI.json';
 
 const Board = () => {
   const dispatch = useAppDispatch();
-  const { board, boardSize, animations, isActive, gameId, mode } = useAppSelector((state) => state.app);
-  const { contract } = useBlockchain();
+  const { board, boardSize, animations, isActive, gameId } = useAppSelector((state) => state.app);
+  const { address } = useAccount();
+  const { data: contract } = useContract({
+    address: contractAddress as `0x${string}`,
+    abi: ABI,
+  });
   const startPointerLocation = useRef<Point>();
   const currentPointerLocation = useRef<Point>();
   const animationDuration = 180;
@@ -22,14 +28,12 @@ const Board = () => {
     (direction: Direction) => {
       if (isActive && gameId && contract) {
         dispatch(moveAction(direction));
-        if (mode === 'onchain') {
-          moveAction(direction).execute?.(contract, gameId, board).catch(console.error);
-        } else {
-          dispatch(addMove(direction));
+        if (address) {
+          moveAction(direction).execute?.(contract, gameId, address).catch(console.error);
         }
       }
     },
-    [dispatch, isActive, gameId, contract, mode, board],
+    [dispatch, isActive, gameId, contract, address],
   );
 
   const [renderedBoard, setRenderedBoard] = useState<BoardType>(board);
