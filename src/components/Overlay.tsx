@@ -2,41 +2,37 @@ import useAppDispatch from '@/hooks/useAppDispatch';
 import useAppSelector from '@/hooks/useAppSelector';
 import { dismissAction, resetGame } from '@/store/game';
 import { useCallback, useEffect } from 'react';
-import { useBlockchain } from '@/providers/minikitprovider'; // Perbaiki path impor
+import { useAccount, useContract } from 'wagmi';
+import { contractAddress } from '@/config/networks';
+import ABI from '@/pages/api/ABI.json';
 
 const Overlay: React.FC = () => {
   const dispatch = useAppDispatch();
-  const boardSize = useAppSelector((state) => state.app.boardSize);
-  const gameId = useAppSelector((state) => state.app.gameId);
-  const isActive = useAppSelector((state) => state.app.isActive);
-  const { contract } = useBlockchain();
+  const { defeat, victory, victoryDismissed } = useAppSelector((state) => state.app);
+  const { address } = useAccount();
+  const { data: contract } = useContract({
+    address: contractAddress as `0x${string}`,
+    abi: ABI,
+  });
 
-  const reset = useCallback(
-    () => dispatch(resetGame()),
-    [dispatch],
-  );
+  const reset = useCallback(() => dispatch(resetGame()), [dispatch]);
   const dismiss = useCallback(() => dispatch(dismissAction()), [dispatch]);
 
   const claimNFT = useCallback(async () => {
-    if (contract && gameId && !isActive) {
+    if (contract && address && !defeat) {
       try {
-        const tx = await contract.claimNFT(gameId);
+        const tx = await contract.claimNFT(address);
         await tx.wait();
         dispatch(resetGame());
       } catch (error) {
         console.error('Error claiming NFT:', error);
       }
     }
-  }, [contract, gameId, isActive, dispatch]);
-
-  const defeat = useAppSelector((state) => state.app.defeat);
-  const victory = useAppSelector(
-    (state) => state.app.victory && !state.app.victoryDismissed,
-  );
+  }, [contract, address, defeat, dispatch]);
 
   return (
     <>
-      {victory && (
+      {victory && !victoryDismissed && (
         <div className="z-999 absolute bottom-0 left-0 right-0 top-0 flex flex-col justify-center bg-[#eb3fb7] bg-opacity-80 text-center align-middle">
           <h1 className="text-2xl font-bold">You win!</h1>
           <div className="flex justify-center gap-2">
