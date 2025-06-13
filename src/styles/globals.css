@@ -1,9 +1,10 @@
+@reference "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  @apply text-black;
+  @apply text-black bg-gray-100;
 }
 
 button {
