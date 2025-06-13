@@ -11,6 +11,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "setup": "pnpm install && pnpm add @web3auth/modal @tanstack/react-query viem wagmi",
     "format": "prettier --write --ignore-unknown .",
     "preinstall": "npx only-allow pnpm",
     "commit": "git-cz",
