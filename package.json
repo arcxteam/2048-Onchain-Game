@@ -16,7 +16,7 @@
     "preinstall": "npx only-allow pnpm",
     "commit": "git-cz",
     "lint-staged": "lint-staged --config lint-staged.config.cjs",
-    "approve-builds": "pnpm approve-builds" // Tambahkan untuk mempermudah approval skrip
+    "approve-builds": "pnpm approve-builds"
   },
   "config": {
     "commitizen": {
@@ -24,40 +24,43 @@
     }
   },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.2.5", // Perbarui ke versi terbaru
-    "clsx": "^2.1.1", // Perbarui ke versi terbaru
-    "next": "^14.2.5", // Perbarui ke patch terbaru 14.x
-    "react": "^18.3.1", // Perbarui ke versi stabil terbaru
-    "react-dom": "^18.3.1", // Perbarui ke versi stabil terbaru
-    "react-redux": "^9.1.2", // Perbarui ke versi terbaru
-    "ethers": "^6.14.4", // Perbarui ke versi terbaru
-    "web3": "^4.9.0", // Perbarui ke versi terbaru
-    "@web3auth/modal": "^10.13.1", // Perbarui ke versi terbaru
-    "@tanstack/react-query": "^5.51.23", // Perbarui ke versi terbaru
-    "viem": "^2.20.2", // Perbarui ke versi terbaru
-    "wagmi": "^2.12.7" // Perbarui ke versi terbaru
+    "@reduxjs/toolkit": "^2.8.2",
+    "@tanstack/react-query": "^5.80.7",
+    "@web3auth/modal": "^10.0.3",
+    "clsx": "^2.1.1",
+    "ethers": "^6.14.4",
+    "glob": "^11.0.3",
+    "lodash": "^4.17.21",
+    "next": "^14.2.30",
+    "qr": "^0.5.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.2.0",
+    "viem": "^2.31.1",
+    "wagmi": "^2.15.6",
+    "web3": "^4.16.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.5.0", // Perbarui ke versi terbaru
-    "@commitlint/config-conventional": "^19.5.0", // Perbarui ke versi terbaru
-    "@types/node": "^20.16.5", // Perbarui ke versi terbaru
-    "@types/prettier": "^3.0.0", // Perbarui ke versi terbaru
-    "@types/react": "^18.3.11", // Perbarui ke versi terbaru
-    "@types/react-dom": "^18.3.0", // Perbarui ke versi terbaru
-    "@typescript-eslint/eslint-plugin": "^8.11.0", // Perbarui ke versi terbaru
-    "@typescript-eslint/parser": "^8.11.0", // Perbarui ke versi terbaru
-    "autoprefixer": "^10.4.21", // Perbarui ke versi terbaru
-    "commitizen": "^4.3.1", // Perbarui ke versi terbaru
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@types/node": "^20.19.0",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
+    "@tailwindcss/postcss": "4.1.10",
+    "autoprefixer": "^10.4.21",
+    "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
-    "eslint": "^9.11.1", // Perbarui ke versi terbaru
-    "eslint-config-next": "^14.2.5", // Sesuaikan dengan versi Next.js
-    "husky": "^9.1.8", // Perbarui ke versi terbaru
-    "lint-staged": "^16.2.0", // Perbarui ke versi terbaru
-    "postcss": "^8.5.5", // Perbarui ke versi terbaru
-    "prettier": "^3.5.3", // Perbarui ke versi terbaru
-    "prettier-plugin-tailwindcss": "^0.6.12", // Perbarui ke versi terbaru
-    "tailwindcss": "^4.1.10", // Perbarui ke versi terbaru
-    "typescript": "^5.8.3" // Pastikan sesuai dengan pengaturan Anda
+    "eslint": "^9.28.0",
+    "eslint-config-next": "^15.3.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.0",
+    "postcss": "^8.5.5",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.12",
+    "tailwindcss": "^4.1.10",
+    "typescript": "^5.8.3"
   },
   "overrides": {
     "@metamask/sdk": {
