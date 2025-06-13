@@ -5,14 +5,15 @@ import Head from 'next/head';
 import { useDispatch, useSelector } from 'react-redux';
 import { move, setGameId, endGame, resetGame, setActive, updateBoard, addMove, setHighestTile } from '@/store/game';
 import { useCallback, useEffect } from 'react';
-import { useBlockchain } from '@/providers/minikitprovider';
-import { slideBoard, calculateHighestTile } from '@/utils/board';
-import { initializeBoard } from '@/utils/board'; // Untuk inisialisasi papan default
+import { useWeb3AuthConnect } from '@web3auth/modal/react';
+import { useAccount } from 'wagmi';
+import { initializeBoard, slideBoard, calculateHighestTile } from '@/utils/board';
 
 export default function Home() {
   const dispatch = useDispatch();
   const { board, isActive } = useSelector((state) => state.app);
-  const { contract, connectWallet, isConnected, errorMessage } = useBlockchain();
+  const { connect } = useWeb3AuthConnect();
+  const { isConnected } = useAccount();
 
   // Inisialisasi papan default tanpa koneksi wallet
   useEffect(() => {
@@ -24,27 +25,24 @@ export default function Home() {
   }, [dispatch, board]);
 
   const handleMove = useCallback((direction: number) => {
-    if (contract && isActive) {
+    if (isActive) {
       const newBoard = slideBoard(board, direction);
       dispatch(updateBoard(newBoard));
       dispatch(addMove(direction));
       dispatch(setHighestTile(calculateHighestTile(newBoard)));
-      if (contract) {
-        contract.play(setGameId, direction, newBoard[0]).catch(console.error);
+      // Panggil kontrak hanya jika terhubung
+      if (isConnected) {
+        // Logika kontrak (perlu disesuaikan dengan Wagmi)
       }
     }
-  }, [contract, isActive, board, dispatch]);
+  }, [isActive, board, dispatch, isConnected]);
 
   const handleGameOver = useCallback(async () => {
-    if (contract && isActive) {
-      try {
-        await contract.endGame(setGameId);
-        dispatch(endGame());
-      } catch (error) {
-        console.error('Game over error:', error);
-      }
+    if (isConnected && isActive) {
+      // Logika kontrak untuk endGame (perlu disesuaikan)
+      dispatch(endGame());
     }
-  }, [contract, isActive, dispatch]);
+  }, [isConnected, isActive, dispatch]);
 
   return (
     <>
@@ -52,7 +50,7 @@ export default function Home() {
         <title>Onchain Game 2048</title>
       </Head>
       <main className="mx-auto grid h-screen max-w-lg items-center p-4 py-8">
-        <Header />
+        <Header onConnect={connect} />
         <Board onMove={handleMove} />
         <Footer onEndGame={handleGameOver} />
       </main>
