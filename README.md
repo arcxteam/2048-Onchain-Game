@@ -35,7 +35,7 @@ Then, install the dependencies and run the development server:
 
 ```bash
 pnpm install
-pnpm run
+pnpm run setup
 pnpm dev
 ```
 
