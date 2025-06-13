@@ -8,7 +8,7 @@ import { configureChains, createConfig, mainnet, sepolia } from "wagmi"; // Perb
 import { publicProvider } from "wagmi"; // Impor langsung dari wagmi
 
 const { chains, publicClient } = configureChains(
-  [mainnet, sepolia, { id: 16601, name: '0g Testnet', rpcUrls: { default: { http: ['https://evmrpc-testnet.0g.ai'] } } }],
+  [testnet, sepolia, { id: 16601, name: '0G-Galileo-Testnet', rpcUrls: { default: { http: ['https://evmrpc-testnet.0g.ai'] } } }],
   [publicProvider()]
 );
 
