@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { type Animation } from '@/types/Animations';
 import { type Direction } from '@/types/Direction';
 import { initializeBoard, type BoardType, movePossible, calculateHighestTile, slideBoard, updateBoard as updateBoardUtil } from '@/utils/board'; // Aliaskan updateBoard menjadi updateBoardUtil
@@ -59,20 +59,28 @@ const gameSlice = createSlice({
   name: 'app',
   initialState,
   reducers: {
-    setGameId: (state, action) => { state.gameId = action.payload; },
-    updateBoard: (state, action) => {
+    setGameId: (state, action: PayloadAction<string | null>) => {
+      state.gameId = action.payload;
+    },
+    updateBoard: (state, action: PayloadAction<BoardType>) => {
       state.board = action.payload;
       state.highestTile = calculateHighestTile(action.payload);
-      state.animations = []; // Reset animations, every refresh by action MOVE
+      state.animations = []; // Reset animations
     },
-    addMove: (state, action) => { state.moves.push(action.payload); },
-    setActive: (state, action) => { state.isActive = action.payload; },
-    setMode: (state, action) => { state.mode = action.payload; },
+    addMove: (state, action: PayloadAction<number>) => {
+      state.moves.push(action.payload);
+    },
+    setActive: (state, action: PayloadAction<boolean>) => {
+      state.isActive = action.payload;
+    },
+    setMode: (state, action: PayloadAction<'onchain' | 'offchain'>) => {
+      state.mode = action.payload;
+    },
     move: {
       reducer(state, action) {
         if (state.defeat) return;
-        const direction = action.payload.direction as Direction;
-        const update = updateBoardUtil(state.board, direction); // Gunakan updateBoardUtil
+        const { direction, execute } = action.payload;
+        const update = updateBoardUtil(state.board, direction);
         state.previousBoard = [...state.board];
         state.board = update.board;
         state.score += update.scoreIncrease || 0;
@@ -83,14 +91,17 @@ const gameSlice = createSlice({
         state.defeat = !movePossible(state.board);
         state.victory = state.highestTile >= 11; // 2048 = 2^11
         if (state.score > state.best) state.best = state.score;
+        if (execute && state.gameId) {
+          execute(); // Eksekusi logika kontrak jika ada
+        }
       },
-      prepare(direction: Direction, execute?: (contract: ethers.Contract, gameId: string) => Promise<void>) {
+      prepare(direction: Direction, execute?: () => void) {
         return { payload: { direction, execute } };
       },
     },
     endGame: (state) => {
       state.isActive = false;
-      state.moves = []; // Reset moves after game over
+      state.moves = [];
     },
     resetGame: (state) => {
       state.gameId = null;
@@ -106,8 +117,14 @@ const gameSlice = createSlice({
       state.animations = initializeBoard(4).animations;
       state.highestTile = 0;
     },
+    setHighestTile: (state, action: PayloadAction<number>) => {
+      state.highestTile = action.payload;
+    },
+    dismissAction: (state) => {
+      state.victoryDismissed = true;
+    },
   },
 });
 
-export const { setGameId, updateBoard, addMove, setActive, setMode, move, endGame, resetGame } = gameSlice.actions;
+export const { setGameId, updateBoard, addMove, setActive, setMode, move, endGame, resetGame, setHighestTile, dismissAction } = gameSlice.actions;
 export default gameSlice.reducer;
