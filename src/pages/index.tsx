@@ -3,7 +3,7 @@ import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import Head from 'next/head';
 import { useDispatch, useSelector } from 'react-redux';
-import { move, setGameId, endGame, resetGame, setActive, updateBoard, addMove, setHighestTile } from '@/store/game';
+import { move, setGameId, endGame, resetGame, setActive, updateBoard, addMove, setHighestTile, setMode } from '@/store/game';
 import { useCallback, useEffect } from 'react';
 import { useWeb3AuthConnect } from "@web3auth/modal/react";
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
@@ -13,27 +13,60 @@ import ABI from '@/pages/api/ABI.json';
 
 export default function Home() {
   const dispatch = useDispatch();
-  const { board, isActive } = useSelector((state) => state.app);
+  const { board, isActive, mode } = useSelector((state) => state.app);
   const { connect } = useWeb3AuthConnect();
   const { isConnected, address } = useAccount();
-  const { data: contractRead } = useContractRead({
+  const { data: boardData } = useContractRead({
     address: contractAddress as `0x${string}`,
     abi: ABI,
-    functionName: 'getBoard', // Ganti dengan fungsi read yang sesuai di kontrak Anda
+    functionName: 'getBoard', // Fungsi untuk membaca board dari kontrak
+    enabled: isConnected && mode === 'onchain',
+  });
+  const { write: approvePlayer } = useContractWrite({
+    address: contractAddress as `0x${string}`,
+    abi: ABI,
+    functionName: 'approvePlayer', // Fungsi untuk otorisasi pemain
+  });
+  const { write: selectMode } = useContractWrite({
+    address: contractAddress as `0x${string}`,
+    abi: ABI,
+    functionName: 'selectMode', // Fungsi untuk memilih mode
+  });
+  const { write: startGame } = useContractWrite({
+    address: contractAddress as `0x${string}`,
+    abi: ABI,
+    functionName: 'startGame', // Fungsi untuk memulai permainan
   });
   const { write: playContract } = useContractWrite({
     address: contractAddress as `0x${string}`,
     abi: ABI,
-    functionName: 'play', // Ganti dengan fungsi write yang sesuai di kontrak Anda
+    functionName: 'play', // Fungsi untuk gerakan
   });
+
+  useEffect(() => {
+    if (isConnected && !gameId) {
+      approvePlayer().then(() => {
+        selectMode({ args: [mode === 'onchain'] }); // Argumen berdasarkan mode
+        startGame({ args: [initializeBoard(4).board] }).then(() => {
+          dispatch(setGameId("game-1")); // Ganti dengan ID dari kontrak jika tersedia
+        });
+      });
+    }
+    if (boardData && mode === 'onchain') {
+      dispatch(updateBoard(boardData as number[]));
+    }
+  }, [isConnected, approvePlayer, selectMode, startGame, dispatch, boardData, mode, gameId]);
 
   useEffect(() => {
     if (!board.length) {
       const { board: initialBoard } = initializeBoard(4);
       dispatch(updateBoard(initialBoard));
       dispatch(setActive(true));
+      if (mode === 'offchain') {
+        dispatch(setMode('offchain'));
+      }
     }
-  }, [dispatch, board]);
+  }, [dispatch, board, mode]);
 
   const handleMove = useCallback((direction: number) => {
     if (isActive) {
@@ -41,14 +74,14 @@ export default function Home() {
       dispatch(updateBoard(newBoard));
       dispatch(addMove(direction));
       dispatch(setHighestTile(calculateHighestTile(newBoard)));
-      if (isConnected && playContract) {
+      if (isConnected && mode === 'onchain' && playContract) {
         playContract({ args: [address, direction, newBoard[0]] }).catch(console.error);
       }
     }
-  }, [isActive, board, dispatch, isConnected, playContract, address]);
+  }, [isActive, board, dispatch, isConnected, mode, playContract, address]);
 
   const handleGameOver = useCallback(async () => {
-    if (isConnected && isActive) {
+    if (isConnected && isActive && mode === 'onchain') {
       try {
         // Ganti dengan fungsi endGame di kontrak jika ada
         dispatch(endGame());
@@ -56,7 +89,7 @@ export default function Home() {
         console.error('Game over error:', error);
       }
     }
-  }, [isConnected, isActive, dispatch]);
+  }, [isConnected, isActive, mode, dispatch]);
 
   return (
     <>
