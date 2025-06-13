@@ -4,14 +4,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { Web3AuthProvider } from "@web3auth/modal/react";
 import { WagmiProvider } from "wagmi";
-import { configureChains, createConfig, mainnet, sepolia } from "wagmi";
+import { configureChains, createConfig, mainnet, sepolia, holesky} from "wagmi";
 import { publicProvider } from "wagmi";
 
 const { chains, publicClient } = configureChains(
   [
     mainnet,
     sepolia,
-    { id: 16601, name: '0g Testnet', rpcUrls: { default: { http: ['https://evmrpc-testnet.0g.ai'] } } },
+    holesky,
+    { id: 16601, name: '0G-Galileo-Testnet', rpcUrls: { default: { http: ['https://evmrpc-testnet.0g.ai'] } } },
   ],
   [publicProvider()]
 );
