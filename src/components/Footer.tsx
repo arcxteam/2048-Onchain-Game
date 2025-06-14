@@ -25,7 +25,6 @@ const Footer: React.FC = () => {
   useEffect(() => {
     setIsWalletConnected(!!address);
     if (address) {
-      // Set default mode to offchain
       dispatch(setMode('offchain'));
     }
   }, [address, dispatch]);
@@ -37,9 +36,7 @@ const Footer: React.FC = () => {
         return;
       }
       try {
-        // Panggil selectMode di kontrak
         await selectMode({ args: [mode === 'onchain'] });
-        // Mulai game baru
         const gameId = ethers.utils.formatBytes32String(`game-${Date.now()}`);
         const initialBoard = [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         const initialMoves = [0, 1, 2];
