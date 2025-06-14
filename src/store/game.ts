@@ -1,40 +1,25 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { type Animation } from '@/types/Animations';
 import { type Direction } from '@/types/Direction';
-import { initializeBoard, type BoardType, movePossible, calculateHighestTile, slideBoard, updateBoard as updateBoardUtil } from '@/utils/board'; // Aliaskan updateBoard menjadi updateBoardUtil
+import { initializeBoard, type BoardType, movePossible, calculateHighestTile, slideBoard, updateBoard as updateBoardUtil } from '@/utils/board';
 
 export interface GameState {
-  /** Board size. Currently always 4. */
   boardSize: number;
-  /** Current board. */
   board: BoardType;
-  /** Previous board. */
   previousBoard?: BoardType;
-  /** Game ID from smart contract. */
   gameId: string | null;
-  /** List of moves for off-chain mode. */
   moves: number[];
-  /** Is game active? */
+  resultBoards: number[];
   isActive: boolean;
-  /** Was 2048 tile found? */
   victory: boolean;
-  /** Is game over? */
   defeat: boolean;
-  /** Should the victory screen be hidden? */
   victoryDismissed: boolean;
-  /** Current score. */
   score: number;
-  /** Score increase after last update. */
   scoreIncrease?: number;
-  /** Best score. */
   best: number;
-  /** Used for certain animations. Mainly as a value of the "key" property. */
   moveId?: string;
-  /** Animations after last update. */
   animations?: Animation[];
-  /** Game mode (onchain or offchain). */
   mode: 'onchain' | 'offchain';
-  /** Highest tile achieved. */
   highestTile: number;
 }
 
@@ -43,6 +28,7 @@ const initialState: GameState = {
   board: initializeBoard(4).board,
   gameId: null,
   moves: [],
+  resultBoards: [],
   isActive: false,
   victory: false,
   defeat: false,
@@ -51,7 +37,7 @@ const initialState: GameState = {
   best: 0,
   moveId: new Date().getTime().toString(),
   animations: initializeBoard(4).animations,
-  mode: 'offchain', // Default mode
+  mode: 'offchain',
   highestTile: 0,
 };
 
@@ -65,7 +51,8 @@ const gameSlice = createSlice({
     updateBoard: (state, action: PayloadAction<BoardType>) => {
       state.board = action.payload;
       state.highestTile = calculateHighestTile(action.payload);
-      state.animations = []; // Reset animations
+      state.resultBoards.push(action.payload[0]);
+      state.animations = [];
     },
     addMove: (state, action: PayloadAction<number>) => {
       state.moves.push(action.payload);
@@ -89,10 +76,10 @@ const gameSlice = createSlice({
         state.moveId = new Date().getTime().toString();
         state.highestTile = calculateHighestTile(state.board);
         state.defeat = !movePossible(state.board);
-        state.victory = state.highestTile >= 11; // 2048 = 2^11
+        state.victory = state.highestTile >= 11;
         if (state.score > state.best) state.best = state.score;
         if (execute && state.gameId) {
-          execute(); // Eksekusi logika kontrak jika ada
+          execute();
         }
       },
       prepare(direction: Direction, execute?: () => void) {
@@ -102,11 +89,13 @@ const gameSlice = createSlice({
     endGame: (state) => {
       state.isActive = false;
       state.moves = [];
+      state.resultBoards = [];
     },
     resetGame: (state) => {
       state.gameId = null;
       state.board = initializeBoard(4).board;
       state.moves = [];
+      state.resultBoards = [];
       state.isActive = false;
       state.victory = false;
       state.defeat = false;
