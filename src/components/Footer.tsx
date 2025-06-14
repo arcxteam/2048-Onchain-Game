@@ -1,59 +1,76 @@
 import { useCallback, useEffect, useState } from 'react';
 import Control from './Control';
-import { useAccount, useContract } from 'wagmi';
+import { useAccount, useContractWrite } from 'wagmi';
 import { contractAddress } from '@/config/networks';
 import ABI from '@/pages/api/ABI.json';
 import { ethers } from 'ethers';
+import useAppDispatch from '@/hooks/useAppDispatch';
+import { setMode, setGameId } from '@/store/game';
 
 const Footer: React.FC = () => {
   const { address } = useAccount();
-  const { data: contract } = useContract({
+  const dispatch = useAppDispatch();
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const { write: selectMode } = useContractWrite({
     address: contractAddress as `0x${string}`,
     abi: ABI,
+    functionName: 'selectMode',
   });
-  const [mode, setMode] = useState<'onchain' | 'offchain' | null>(null);
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const { write: startGame } = useContractWrite({
+    address: contractAddress as `0x${string}`,
+    abi: ABI,
+    functionName: 'startGame',
+  });
 
   useEffect(() => {
     setIsWalletConnected(!!address);
-  }, [address]);
+    if (address) {
+      // Set default mode to offchain
+      dispatch(setMode('offchain'));
+    }
+  }, [address, dispatch]);
 
-  const handleModeSelect = useCallback(() => {
-    if (!isWalletConnected) {
-      alert('Please connect your wallet first!');
-      return;
-    }
-    if (!contract) {
-      alert('Contract not initialized. Please try again.');
-      return;
-    }
-    const selectedMode = prompt('Select mode (onchain/offchain):');
-    if (selectedMode === 'onchain' || selectedMode === 'offchain') {
-      setMode(selectedMode);
-      const startGame = async () => {
+  const handleModeSelect = useCallback(
+    async (mode: 'onchain' | 'offchain') => {
+      if (!isWalletConnected) {
+        alert('Please connect your wallet first!');
+        return;
+      }
+      try {
+        // Panggil selectMode di kontrak
+        await selectMode({ args: [mode === 'onchain'] });
+        // Mulai game baru
+        const gameId = ethers.utils.formatBytes32String(`game-${Date.now()}`);
         const initialBoard = [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         const initialMoves = [0, 1, 2];
-        const gameId = ethers.utils.formatBytes32String(`game-${Date.now()}`);
-        const tx = await contract.startGame(gameId, [initialBoard[0], 0, 0, 0], initialMoves);
-        await tx.wait();
-        console.log('Game started with ID:', gameId);
-      };
-      startGame().catch(console.error);
-    } else {
-      alert('Invalid mode! Please select "onchain" or "offchain".');
-    }
-  }, [isWalletConnected, contract]);
+        await startGame({ args: [gameId, [initialBoard[0], 0, 0, 0], initialMoves] });
+        dispatch(setMode(mode));
+        dispatch(setGameId(gameId));
+      } catch (error) {
+        console.error('Error selecting mode or starting game:', error);
+        alert('Failed to select mode or start game.');
+      }
+    },
+    [isWalletConnected, selectMode, startGame, dispatch],
+  );
 
   return (
     <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#adadad]">
-      <div className="mt-2 w-full">
+      <div className="mt-2 w-full flex gap-4 justify-center">
         <Control />
         <button
-          onClick={handleModeSelect}
-          className="font-lg mt-2 w-full px-16 py-4"
-          disabled={!isWalletConnected || !!mode}
+          onClick={() => handleModeSelect('onchain')}
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+          disabled={!isWalletConnected}
         >
-          {mode ? `Mode: ${mode}` : 'Select Mode'}
+          Onchain
+        </button>
+        <button
+          onClick={() => handleModeSelect('offchain')}
+          className="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50"
+          disabled={!isWalletConnected}
+        >
+          Offchain
         </button>
       </div>
       <p>
@@ -64,7 +81,7 @@ const Footer: React.FC = () => {
           rel="noopener noreferrer"
           className="font-bold underline"
         >
-          © 2025 Greyscope&Co. by@0xgr3y
+          © 2025 Greyscope&Co. by;@0xgr3y
         </a>
         .
       </p>
