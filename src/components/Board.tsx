@@ -8,32 +8,31 @@ import { moveAction } from '@/store/action';
 import { type BoardType } from '@/utils/board';
 import { type Animation, AnimationType } from '@/types/Animations';
 import Overlay from './Overlay';
-import { useAccount, useContract } from 'wagmi';
+import { useAccount, useContractWrite } from 'wagmi';
 import { contractAddress } from '@/config/networks';
 import ABI from '@/pages/api/ABI.json';
 
-const Board = () => {
+const Board = ({ onMove }: { onMove: (direction: number) => void }) => {
   const dispatch = useAppDispatch();
   const { board, boardSize, animations, isActive, gameId } = useAppSelector((state) => state.app);
   const { address } = useAccount();
-  const { data: contract } = useContract({
+  const { write: playContract } = useContractWrite({
     address: contractAddress as `0x${string}`,
     abi: ABI,
+    functionName: 'play',
   });
   const startPointerLocation = useRef<Point>();
   const currentPointerLocation = useRef<Point>();
   const animationDuration = 180;
 
-  const onMove = useCallback(
+  const handleMove = useCallback(
     (direction: Direction) => {
-      if (isActive && gameId && contract) {
+      if (isActive && gameId) {
         dispatch(moveAction(direction));
-        if (address) {
-          moveAction(direction).execute?.(contract, gameId, address).catch(console.error);
-        }
+        onMove(direction);
       }
     },
-    [dispatch, isActive, gameId, contract, address],
+    [dispatch, isActive, gameId, onMove],
   );
 
   const [renderedBoard, setRenderedBoard] = useState<BoardType>(board);
@@ -45,27 +44,27 @@ const Board = () => {
     const keydownListener = (e: KeyboardEvent) => {
       e.preventDefault();
       switch (e.key) {
-        case 'ArrowDown': onMove(Direction.DOWN); break;
-        case 'ArrowUp': onMove(Direction.UP); break;
-        case 'ArrowLeft': onMove(Direction.LEFT); break;
-        case 'ArrowRight': onMove(Direction.RIGHT); break;
+        case 'ArrowDown': handleMove(Direction.DOWN); break;
+        case 'ArrowUp': handleMove(Direction.UP); break;
+        case 'ArrowLeft': handleMove(Direction.LEFT); break;
+        case 'ArrowRight': handleMove(Direction.RIGHT); break;
       }
     };
     window.addEventListener('keydown', keydownListener);
     return () => window.removeEventListener('keydown', keydownListener);
-  }, [onMove]);
+  }, [handleMove]);
 
   const finishPointer = useCallback(
     (a: Point, b: Point) => {
       const distance = Math.sqrt((b.y - a.y) ** 2 + (b.x - a.x) ** 2);
       if (distance < 20) return;
       const angle = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
-      if (angle < -135 || angle > 135) onMove(Direction.LEFT);
-      else if (angle < -45) onMove(Direction.UP);
-      else if (angle < 45) onMove(Direction.RIGHT);
-      else if (angle < 135) onMove(Direction.DOWN);
+      if (angle < -135 || angle > 135) handleMove(Direction.LEFT);
+      else if (angle < -45) handleMove(Direction.UP);
+      else if (angle < 45) handleMove(Direction.RIGHT);
+      else if (angle < 135) handleMove(Direction.DOWN);
     },
-    [onMove],
+    [handleMove],
   );
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
