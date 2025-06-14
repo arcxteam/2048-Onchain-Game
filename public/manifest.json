@@ -1,6 +1,7 @@
 {
-  "name": "2048",
+  "name": "2048 Onchain Game",
   "short_name": "2048",
+  "description": "Play 2048 0G Onchain Game on Any Device, Anywhere.",
   "icons": [
     {
       "src": "/android-192x192.png",
