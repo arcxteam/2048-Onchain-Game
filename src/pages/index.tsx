@@ -5,7 +5,7 @@ import Head from 'next/head';
 import { useDispatch, useSelector } from 'react-redux';
 import { move, setGameId, endGame, resetGame, setActive, updateBoard, addMove, setHighestTile } from '@/store/game';
 import { useCallback, useEffect, useState } from 'react';
-import { useWeb3AuthConnect } from "@web3auth/modal/react";
+import { useWeb3Auth } from "@web3auth/modal";
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
 import { initializeBoard, slideBoard, calculateHighestTile } from '@/utils/board';
 import { contractAddress } from '@/config/networks';
@@ -15,7 +15,7 @@ import { ethers } from 'ethers';
 export default function Home() {
   const dispatch = useDispatch();
   const { board, isActive, mode, gameId } = useSelector((state: any) => state.app);
-  const { connect } = useWeb3AuthConnect();
+  const { web3auth } = useWeb3Auth();
   const { isConnected, address } = useAccount();
   const [isInitialized, setIsInitialized] = useState(false);
   const { data: boardData } = useContractRead({
@@ -41,25 +41,31 @@ export default function Home() {
     functionName: 'submitBatchMoves',
   });
 
-  // Inisialisasi awal saat wallet terkoneksi
+  const connectWallet = useCallback(async () => {
+    if (!web3auth) return;
+    try {
+      await web3auth.connect();
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+    }
+  }, [web3auth]);
+
   useEffect(() => {
     if (isConnected && address && !isInitialized) {
       approvePlayer().then(() => {
-        setIsInitialized(true); // Hanya sekali
+        setIsInitialized(true);
       }).catch((error) => {
         console.error('Error approving player:', error);
       });
     }
   }, [isConnected, address, approvePlayer, isInitialized]);
 
-  // Update board dari kontrak untuk mode on-chain
   useEffect(() => {
     if (boardData && mode === 'onchain') {
       dispatch(updateBoard(boardData[0] as number[]));
     }
   }, [boardData, mode, dispatch]);
 
-  // Inisialisasi board awal untuk off-chain
   useEffect(() => {
     if (!board.length) {
       const { board: initialBoard } = initializeBoard(4);
@@ -84,14 +90,14 @@ export default function Home() {
     try {
       if (mode === 'offchain') {
         const moves = useSelector((state: any) => state.app.moves);
-        const resultBoards = [board[0]]; // Sesuaikan dengan state board
+        const resultBoards = useSelector((state: any) => state.app.resultBoards);
         await submitBatchMoves({ args: [gameId, moves, resultBoards] });
       }
       dispatch(endGame());
     } catch (error) {
       console.error('Game over error:', error);
     }
-  }, [isConnected, isActive, mode, dispatch, submitBatchMoves, gameId, board]);
+  }, [isConnected, isActive, mode, dispatch, submitBatchMoves, gameId]);
 
   return (
     <>
@@ -99,7 +105,7 @@ export default function Home() {
         <title>Onchain Game 2048</title>
       </Head>
       <main className="mx-auto grid h-screen max-w-lg items-center p-4 py-8">
-        <Header onConnect={connect} />
+        <Header onConnect={connectWallet} />
         <Board onMove={handleMove} />
         <Footer onEndGame={handleGameOver} />
       </main>
