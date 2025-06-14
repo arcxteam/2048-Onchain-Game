@@ -1,55 +1,37 @@
-import { type Direction } from '@/types/Direction';
-import { ActionType } from '@/types/ActionType';
 import { type ActionModel } from '@/types/Models';
-import { slideBoard } from '@/utils/board';
+import { type Direction } from '@/types/Direction';
+import { type Contract } from 'ethers';
+import { setGameId, move, endGame, resetGame, setMode } from './game';
 
-function resetAction(size: number): ActionModel {
-  return {
-    type: ActionType.RESET,
-    value: size,
-  };
-}
+export const resetAction = () => (dispatch: any) => {
+  dispatch(resetGame());
+};
 
-function moveAction(direction: Direction): ActionModel {
+export const moveAction = (direction: Direction) => {
   return {
-    type: ActionType.MOVE,
-    value: direction,
-    async execute(contract: ethers.Contract, gameId: string, board: number[]) {
-      if (contract && gameId) {
-        const newBoard = slideBoard(board, direction);
-        if (newBoard) {
-          await contract.play(gameId, direction, newBoard[0]); // Send the first element as uint128
-          return newBoard;
-        }
-      }
+    ...move(direction),
+    execute: async (contract: Contract, gameId: string, address: string) => {
+      const tx = await contract.play(gameId, direction, 0); // resultBoard dihitung di kontrak
+      await tx.wait();
     },
   };
-}
+};
 
-function endGameAction(gameId: string): ActionModel {
+export const endGameAction = () => (dispatch: any) => {
+  dispatch(endGame());
+};
+
+export const selectModeAction = (mode: 'onchain' | 'offchain') => (dispatch: any) => {
+  dispatch(setMode(mode));
+};
+
+export const claimNFTAction = (gameId: string) => {
   return {
-    type: 'END_GAME',
-    value: gameId,
-    async execute(contract: ethers.Contract) {
-      if (contract && gameId) {
-        const tx = await contract.endGame(gameId);
-        await tx.wait();
-      }
+    type: 'claimNFT',
+    execute: async (contract: Contract) => {
+      const tx = await contract.claimNFT(gameId);
+      await tx.wait();
+      return tx;
     },
   };
-}
-
-function claimNFTAction(gameId: string): ActionModel {
-  return {
-    type: 'CLAIM_NFT',
-    value: gameId,
-    async execute(contract: ethers.Contract) {
-      if (contract && gameId) {
-        const tx = await contract.claimNFT(gameId);
-        await tx.wait();
-      }
-    },
-  };
-}
-
-export { resetAction, moveAction, endGameAction, claimNFTAction };
+};
