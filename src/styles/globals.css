@@ -3,11 +3,15 @@
 @tailwind utilities;
 
 body {
-  @apply text-black bg-gray-100 font-sans;
+  @apply text-black max-w-[100vw] overflow-x-hidden font-geist-mono;
 }
 
 button {
-  @apply m-0 whitespace-nowrap rounded-md bg-[#8f7a66] px-4 py-2 font-bold text-white outline-none disabled:cursor-not-allowed disabled:opacity-50 transition duration-150 ease-in-out;
+  @apply m-0 whitespace-nowrap rounded-md bg-[#8f7a66] px-4 py-2 font-bold text-white outline-none cursor-not-allowed opacity-75 transition-all duration-150 ease-in-out;
+}
+
+button:hover:not(:disabled) {
+  @apply opacity-100;
 }
 
 .animate-appear {
@@ -19,12 +23,22 @@ button {
 }
 
 @keyframes appear {
-  from { transform: scale(0); }
-  to { transform: scale(1); }
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
 }
 
 @keyframes pop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
