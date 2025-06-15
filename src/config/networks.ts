@@ -1,5 +1,5 @@
 export const networkConfigs = {
-  '0g-testnet': {
+  '0G-Galileo-Testnet': {
     chainId: 16601,
     rpcUrl: 'https://evmrpc-testnet.0g.ai',
   },
