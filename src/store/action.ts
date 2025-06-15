@@ -3,15 +3,16 @@ import { type Direction } from '@/types/Direction';
 import { type Contract } from 'ethers';
 import { setGameId, move, endGame, resetGame, setMode } from './game';
 
-export const resetAction = () => (dispatch: any) => {
+export const resetAction = (boardSize: number) => (dispatch: any) => {
   dispatch(resetGame());
+  dispatch({ type: 'setActive', payload: true });
 };
 
 export const moveAction = (direction: Direction) => {
   return {
     ...move(direction),
     execute: async (contract: Contract, gameId: string, address: string) => {
-      const tx = await contract.play(gameId, direction, 0); // resultBoard dihitung di kontrak
+      const tx = await contract.play(gameId, direction, 0);
       await tx.wait();
     },
   };
@@ -35,3 +36,7 @@ export const claimNFTAction = (gameId: string) => {
     },
   };
 };
+
+export const dismissAction = () => ({
+  type: 'dismiss',
+});
