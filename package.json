@@ -1,47 +1,56 @@
 {
-  "name": "2048-onchain",
-  "version": "0.1.0",
+  "name": "2048",
+  "version": "0.1.3",
   "private": true,
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": "please-use-pnpm"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --check .",
-    "format:fix": "prettier --write .",
-    "setup": "pnpm add @web3auth/modal wagmi viem"
+    "format": "prettier --write --ignore-unknown .",
+    "preinstall": "npx only-allow pnpm",
+    "commit": "git-cz",
+    "lint-staged": "lint-staged --config lint-staged.config.cjs"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
   },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.3.0",
-    "@tanstack/react-query": "^5.59.15",
-    "@web3auth/modal": "^10.0.3",
-    "autoprefixer": "^10.4.20",
-    "clsx": "^2.1.1",
-    "ethers": "^6.13.4",
-    "next": "^15.3.3",
-    "postcss": "^8.4.47",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-redux": "^9.1.2",
-    "tailwindcss": "^3.4.19",
-    "viem": "^2.21.27",
-    "wagmi": "^2.15.6",
-    "web3": "^4.14.0"
+    "@reduxjs/toolkit": "^1.9.5",
+    "clsx": "^1.2.1",
+    "next": "14.2.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-redux": "^8.0.5",
+    "ethers": "^6.1.3",
+    "web3": "^4.1.3"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.5.0",
-    "@commitlint/config-conventional": "^19.5.0",
-    "@types/node": "^24.0.1",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@typescript-eslint/eslint-plugin": "^8.11.0",
-    "@typescript-eslint/parser": "^8.11.0",
-    "eslint": "^9.29.0",
-    "eslint-config-next": "^15.3.3",
-    "eslint-plugin-react": "^7.37.1",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "lint-staged": "^16.1.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.8.3"
+    "@commitlint/cli": "^17.6.1",
+    "@commitlint/config-conventional": "^17.6.1",
+    "@types/node": "18.16.0",
+    "@types/prettier": "^2.7.2",
+    "@types/react": "18.0.38",
+    "@types/react-dom": "18.0.11",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "autoprefixer": "10.4.14",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "8.39.0",
+    "eslint-config-next": "13.3.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.1",
+    "postcss": "8.4.31",
+    "prettier": "^2.8.8",
+    "prettier-plugin-tailwindcss": "^0.2.7",
+    "tailwindcss": "3.3.1",
+    "typescript": "5.0.4"
   }
 }
