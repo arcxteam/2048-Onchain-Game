@@ -25,7 +25,7 @@ const Footer: React.FC = () => {
   useEffect(() => {
     setIsWalletConnected(!!address);
     if (address) {
-      dispatch(setMode('offchain'));
+      dispatch(setMode('offchain')); // Default offchain
     }
   }, [address, dispatch]);
 
@@ -52,8 +52,8 @@ const Footer: React.FC = () => {
   );
 
   return (
-    <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#adadad]">
-      <div className="mt-2 w-full flex gap-4 justify-center">
+    <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#adadad] font-geist-mono">
+      <div className="mt-2 w-full flex justify-center gap-4">
         <Control />
         <button
           onClick={() => handleModeSelect('onchain')}
@@ -78,7 +78,7 @@ const Footer: React.FC = () => {
           rel="noopener noreferrer"
           className="font-bold underline"
         >
-          © 2025 Greyscope&Co. by;@0xgr3y
+          © 2025 Greyscope&Co. by;0xgr3y
         </a>
         .
       </p>
