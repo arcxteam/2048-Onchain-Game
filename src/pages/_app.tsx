@@ -2,14 +2,25 @@ import { store } from '@/store';
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import { Provider } from 'react-redux';
-import { Web3AuthProviders } from '@/providers/web3auth';
+import { MiniKitProvider } from '@/minikitprovider';
+import { useEffect, useState } from 'react';
 
 export default function App({ Component, pageProps }: AppProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <Provider store={store}>
-      <Web3AuthProviders>
+      <MiniKitProvider>
         <Component {...pageProps} />
-      </Web3AuthProviders>
+      </MiniKitProvider>
     </Provider>
   );
 }
