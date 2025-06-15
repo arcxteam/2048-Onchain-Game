@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { type Animation } from '@/types/Animations';
 import { type Direction } from '@/types/Direction';
-import { initializeBoard, type BoardType, movePossible, calculateHighestTile, slideBoard, updateBoard as updateBoardUtil } from '@/utils/board';
+import { initializeBoard, type BoardType, movePossible, calculateHighestTile, updateBoard as updateBoardUtil } from '@/utils/board';
 
 export interface GameState {
   boardSize: number;
