@@ -104,6 +104,7 @@ function rotateBoard(
   direction: Direction,
   undo = false,
 ): BoardType {
+  // No need to rotate, it's already in the correct orientation.
   if (direction === Direction.DOWN) {
     return [...board];
   }
@@ -135,6 +136,7 @@ function rotateAnimations(
   animations: Animation[],
   direction: Direction,
 ): Animation[] {
+  // No need to rotate, it's already in the correct orientation.
   if (direction === Direction.DOWN) {
     return animations;
   }
@@ -162,6 +164,8 @@ export function updateBoard(
   direction: Direction,
 ): BoardUpdate {
   const boardSize = Math.sqrt(board.length);
+
+  // First the board is rotated so gravity can work downwards.
   board = rotateBoard(board, direction);
 
   let changed = false;
@@ -170,6 +174,7 @@ export function updateBoard(
   let lastMergedIndex: number | undefined = undefined;
 
   for (let col = 0; col < boardSize; col++) {
+    // Going from second last to the first row on the rotated board.
     for (let row = boardSize - 2; row >= 0; row--) {
       const initialIndex = row * boardSize + col;
       if (board[initialIndex] === 0) {
@@ -189,10 +194,17 @@ export function updateBoard(
         changed = true;
 
         if (board[below] !== 0) {
+          // Ensure non-greedy behavior, only allow first merge after fall.
           merged = true;
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           scoreIncrease += board[i] * 2;
         }
 
+        // Merge or update tile.
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         board[below] += board[i];
         board[i] = 0;
         i = below;
@@ -210,6 +222,7 @@ export function updateBoard(
 
         if (merged) {
           lastMergedIndex = finalIndex;
+
           animations.push({
             type: AnimationType.MERGE,
             index: finalIndex,
@@ -219,9 +232,11 @@ export function updateBoard(
     }
   }
 
+  // Undo board rotation.
   board = rotateBoard(board, direction, true);
   animations = rotateAnimations(board, animations, direction);
 
+  // Generate a new tile on change.
   if (changed) {
     const result = newTile(board);
     board = result.board;
@@ -244,6 +259,7 @@ export function movePossible(board: BoardType): boolean {
     return true;
   }
 
+  // Check if a tile can be merged into a neighboring tile.
   for (let i = 0; i < board.length; i++) {
     if (
       board[i] === board[i + boardSize] ||
@@ -256,14 +272,4 @@ export function movePossible(board: BoardType): boolean {
   }
 
   return false;
-}
-
-export function calculateHighestTile(board: BoardType): number {
-  return Math.max(...board.filter(v => v > 0));
-}
-
-// Tambahan fungsi untuk blockchain
-export function slideBoard(board: BoardType, direction: Direction): BoardType {
-  const update = updateBoard(board, direction);
-  return update.board;
 }
