@@ -3,42 +3,9 @@
 @tailwind utilities;
 
 body {
-  @apply text-black max-w-[100vw] overflow-x-hidden font-geist-mono;
+  @apply text-black;
 }
 
 button {
-  @apply m-0 whitespace-nowrap rounded-md bg-[#8f7a66] px-4 py-2 font-bold text-white outline-none cursor-not-allowed opacity-75 transition-all duration-150 ease-in-out;
-}
-
-button:hover:not(:disabled) {
-  @apply opacity-100;
-}
-
-.animate-appear {
-  animation: appear 0.2s ease-in-out;
-}
-
-.animate-pop {
-  animation: pop 0.2s ease-in-out;
-}
-
-@keyframes appear {
-  from {
-    transform: scale(0);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-@keyframes pop {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
+  @apply m-0 whitespace-nowrap rounded-md bg-[#8f7a66] p-2 align-middle font-bold leading-3 text-white outline-none disabled:cursor-not-allowed disabled:opacity-75;
 }
