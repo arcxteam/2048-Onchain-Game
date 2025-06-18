@@ -1,17 +1,5 @@
 # Game 2048: A Familiar Favorite, Powered by Onchain game - Credit 0xgr3y
 
-**Experience the classic 2048 game, now integrated with the Worldcoin ecosystem for simple, user-friendly donations.**  
-
-### Gameplay You Know and Love:
-
-* **Merging Tiles:**  Slide tiles to combine them and reach the coveted 2048 tile. 
-* **Intuitive Controls:**  Use arrow keys or swipe on mobile to move the tiles. 
-* **Challenge Yourself:**  Test your strategy and skills in this addictive puzzle game.
-
-### See it in action!
-
-<img src="https://github.com/user-attachments/assets/b3b211ac-9ef6-4f33-81b3-ad8a5c1c9a57" width="250" height="auto"/>
-
 # 🕹️ 2048
 
 Implementation of the famous 2048 game in Next.js. You can play it
@@ -35,29 +23,104 @@ Then, install the dependencies and run the development server:
 
 ```bash
 pnpm install
-pnpm run setup
-pnpm dev
+pnpm dev --turbopack
 ```
 
 Finally, open your browser and go to http://localhost:3000 to play the game.
 
-## Controls
+```diff
+Struktur File Asli (FINAL) - Versi Terkonfirmasi
 
-- The game is played with the arrow keys ( &larr; &uarr; &darr; &rarr; ) .
-- If you want to play on your phone, you can use the swipe gestures.
+game/
+├── .env.local
+├── .eslintrc.cjs
+├── .gitignore
+├── .npmrc
+├── .prettierrc
+├── LICENSE
+├── README.md
+├── commitlint.config.cjs
+├── lint-staged.config.cjs
+├── next.config.mjs
+├── package.json
+├── pnpm-lock.yaml (dihapus nanti setelah update package.json)
+├── postcss.config.cjs
+├── prettier.config.cjs
+├── tailwind.config.cjs
+├── tsconfig.json
+└── public/
+    ├── game-assets/
+    │   ├── 2.jpg
+    │   ├── 4.jpg
+    │   ├── 8.jpg
+    │   ├── 16.jpg
+    │   ├── 32.jpg
+    │   ├── 64.jpg
+    │   ├── 128.jpg
+    │   ├── 256.jpg
+    │   ├── 512.jpg
+    │   ├── 1024.jpg
+    │   └── 2048.jpg
+    ├── 2048-black.png
+    ├── 2048-color.png
+    ├── android-192x192.png
+    ├── android-512x512.png
+    ├── apple-180x180.png
+    ├── favicon-16x16.png
+    ├── favicon-32x32.png
+    ├── favicon.ico
+    ├── manifest.json
+    ├── og.webp
+    └── safari-pinned-tab.svg
+└── src/
+    ├── components/
+    │   ├── Board.tsx
+    │   ├── Control.tsx
+    │   ├── Footer.tsx
+    │   ├── Header.tsx
+    │   ├── Overlay.tsx
+    │   └── Tile.tsx
+    ├── hooks/
+    │   ├── useAppDispatch.ts
+    │   └── useAppSelector.ts
+    ├── pages/
+    │   ├── _app.tsx
+    │   ├── _document.tsx
+    │   ├── index.tsx
+    │   └── api/
+    │       ├── confirmpayment.ts
+    │       └── startpayment.ts
+    ├── store/
+    │   ├── action.ts
+    │   ├── game.ts
+    │   └── index.ts
+    ├── styles/
+    │   └── globals.css
+    ├── types/
+    │   ├── ActionType.ts
+    │   ├── Animations.ts
+    │   ├── Direction.ts
+    │   └── Models.ts
+    ├── utils/
+    │   ├── board.ts
+    │   └── localStorage.ts
+    └── web3/
+        ├── providers.tsx
+        ├── onchainMove.tsx
+        ├── offchainMove.tsx
+        ├── contractInteractions.ts
+        ├── useWalletConnect.ts
+        ├── leaderboard.ts
+        ├── nftClaim.ts
+        ├── networks.ts
+        ├── modeSelection.ts
+        ├── gameState.ts
+        ├── utils.ts
+        ├── types.ts
+        ├── stateManagement.ts
+        ├── errorHandler.ts
+        ├── uiComponents.tsx
+        ├── api/
+        │   ├── abi.json
+        │   └── abi.ts
 
-
-# Behind the Scenes:
-
-This project was built for the ETH Global Brussels 2024 Hackathon using the following tech stack:
-
-* **TypeScript:**  Ensures code quality and maintainability.
-* **Next.js:**  Provides a powerful framework for building web applications.
-* **Tailwind CSS:**  Delivers a clean, modern design aesthetic.
-* **Redux Toolkit:**  Manages application state with ease.
-
-**This project is open-source and available for everyone to explore and build upon!**
-
-1. **Download the Code:** Fork this repository to your own GitHub account.
-2. **Examine the Implementation:**  Review the source code to understand how the game and donation features are integrated. 
-3. **Contribute:**  Feel free to submit issues, pull requests, or suggestions to improve the project.
