@@ -29,7 +29,7 @@ pnpm dev --turbopack
 Finally, open your browser and go to http://localhost:3000 to play the game.
 
 ```diff
-Struktur File Asli (FINAL) - Versi Terkonfirmasi
+Struktur File Asli (FINAL)
 
 game/
 ├── .env.local
@@ -43,7 +43,7 @@ game/
 ├── lint-staged.config.cjs
 ├── next.config.mjs
 ├── package.json
-├── pnpm-lock.yaml (dihapus nanti setelah update package.json)
+├── pnpm-lock.yaml
 ├── postcss.config.cjs
 ├── prettier.config.cjs
 ├── tailwind.config.cjs
