@@ -23,7 +23,7 @@ Then, install the dependencies and run the development server:
 
 ```bash
 pnpm install
-pnpm dev --turbopack
+pnpm dev
 ```
 
 Finally, open your browser and go to http://localhost:3000 to play the game.
