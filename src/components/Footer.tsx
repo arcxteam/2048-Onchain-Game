@@ -1,73 +1,83 @@
-import { useCallback, useEffect, useState } from 'react';
+import {
+  MiniKit,
+  tokenToDecimals,
+  Tokens,
+  PayCommandInput,
+  ResponseEvent,
+  MiniAppPaymentPayload,
+} from '@worldcoin/minikit-js';
+import { useEffect, useState } from 'react';
 import Control from './Control';
-import { useAccount, useContractWrite } from 'wagmi';
-import { contractAddress } from '@/config/networks';
-import ABI from '@/pages/api/ABI.json';
-import { ethers } from 'ethers';
-import useAppDispatch from '@/hooks/useAppDispatch';
-import { setMode, setGameId } from '@/store/game';
+import { useModeSelection } from '@/web3/modeSelection'; // Impor hook
 
 const Footer: React.FC = () => {
-  const { address } = useAccount();
-  const dispatch = useAppDispatch();
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const { write: selectMode } = useContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi: ABI,
-    functionName: 'selectMode',
-  });
-  const { write: startGame } = useContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi: ABI,
-    functionName: 'startGame',
-  });
+  const [mode, setMode] = useState<'offchain' | 'onchain' | null>(null); // Placeholder untuk mode
+  const { selectMode } = useModeSelection(); // Hook dari /src/web3/
 
   useEffect(() => {
-    setIsWalletConnected(!!address);
-    if (address) {
-      dispatch(setMode('offchain')); // Default offchain
+    if (!MiniKit.isInstalled()) {
+      return;
     }
-  }, [address, dispatch]);
 
-  const handleModeSelect = useCallback(
-    async (mode: 'onchain' | 'offchain') => {
-      if (!isWalletConnected) {
-        alert('Please connect your wallet first!');
-        return;
-      }
-      try {
-        await selectMode({ args: [mode === 'onchain'] });
-        const gameId = ethers.utils.formatBytes32String(`game-${Date.now()}`);
-        const initialBoard = [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        const initialMoves = [0, 1, 2];
-        await startGame({ args: [gameId, [initialBoard[0], 0, 0, 0], initialMoves] });
-        dispatch(setMode(mode));
-        dispatch(setGameId(gameId));
-      } catch (error) {
-        console.error('Error selecting mode or starting game:', error);
-        alert('Failed to select mode or start game.');
-      }
-    },
-    [isWalletConnected, selectMode, startGame, dispatch],
-  );
+    MiniKit.subscribe(
+      ResponseEvent.MiniAppPayment,
+      async (payload: MiniAppPaymentPayload) => {
+        if (payload.status == 'success') {
+          const payment = await fetch(`/api/confirmpayment`, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+          });
+          const json = await payment.json();
+          if (json.success) {
+            console.log('worked!');
+          }
+        }
+      },
+    );
+
+    return () => {
+      MiniKit.unsubscribe(ResponseEvent.MiniAppPayment);
+    };
+  }, []);
+
+  const startPayment = async () => {
+    const res = await fetch(`/api/startpayment`);
+
+    const payload: PayCommandInput = {
+      reference: await res.text(),
+      to: '0xdF0d5abC614EF45C4bCEA121624644523BAc80b7',
+      tokens: [
+        {
+          symbol: Tokens.WLD,
+          token_amount: tokenToDecimals(1, Tokens.WLD).toString(),
+        },
+        {
+          symbol: Tokens.USDCE,
+          token_toDecimals: tokenToDecimals(3, Tokens.USDCE).toString(),
+        },
+      ],
+      description: 'Select Mode',
+    };
+
+    if (MiniKit.isInstalled()) {
+      MiniKit.commands.pay(payload);
+    }
+  };
+
+  const handleModeSelect = () => {
+    selectMode(); // Panggil hook
+    setMode(mode === 'offchain' ? 'onchain' : 'offchain');
+  };
 
   return (
-    <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#adadad] font-geist-mono">
-      <div className="mt-2 w-full flex justify-center gap-4">
+    <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#adadad]">
+      <div className="mt-2 w-full">
         <Control />
         <button
-          onClick={() => handleModeSelect('onchain')}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-          disabled={!isWalletConnected}
+          onClick={handleModeSelect}
+          className="font-lg mt-2 w-full px-16 py-4"
         >
-          Onchain
-        </button>
-        <button
-          onClick={() => handleModeSelect('offchain')}
-          className="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50"
-          disabled={!isWalletConnected}
-        >
-          Offchain
+          Select Mode {mode ? `(${mode})` : ''}
         </button>
       </div>
       <p>
