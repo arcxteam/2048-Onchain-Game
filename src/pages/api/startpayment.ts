@@ -1,10 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ethers } from 'ethers';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const gameId = ethers.utils.formatBytes32String(`game-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
-  res.status(200).json({ gameId });
+  const uuid = crypto.randomUUID().replace(/-/g, '');
+
+  req.cookies.reference = uuid;
+  res.status(200).send(uuid);
 }
