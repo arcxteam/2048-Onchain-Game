@@ -1,119 +1,132 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { ActionType } from '@/types/ActionType';
 import { type Animation } from '@/types/Animations';
 import { type Direction } from '@/types/Direction';
-import { initializeBoard, type BoardType, movePossible, calculateHighestTile, updateBoard as updateBoardUtil } from '@/utils/board';
+import { type ActionModel } from '@/types/Models';
+import {
+  initializeBoard,
+  type BoardType,
+  updateBoard,
+  movePossible,
+} from '@/utils/board';
+import { getStoredData, setStoredData } from '@/utils/localStorage';
 
+// Define a type for the game state
 export interface GameState {
+  /** Board size. Currently always 4. */
   boardSize: number;
+
+  /** Current board. */
   board: BoardType;
+
+  /** Previous board. */
   previousBoard?: BoardType;
-  gameId: string | null;
-  moves: number[];
-  resultBoards: number[];
-  isActive: boolean;
+
+  /** Was 2048 tile found? */
   victory: boolean;
+
+  /** Is game over? */
   defeat: boolean;
+
+  /** Should the victory screen be hidden? */
   victoryDismissed: boolean;
+
+  /** Current score. */
   score: number;
+
+  /** Score increase after last update. */
   scoreIncrease?: number;
+
+  /** Best score. */
   best: number;
+
+  /** Used for certain animations. Mainly as a value of the "key" property. */
   moveId?: string;
+
+  /** Animations after last update. */
   animations?: Animation[];
-  mode: 'onchain' | 'offchain';
-  highestTile: number;
 }
 
-const initialState: GameState = {
-  boardSize: 4,
-  board: initializeBoard(4).board,
-  gameId: null,
-  moves: [],
-  resultBoards: [],
-  isActive: false,
-  victory: false,
-  defeat: false,
-  victoryDismissed: false,
-  score: 0,
-  best: 0,
-  moveId: new Date().getTime().toString(),
-  animations: initializeBoard(4).animations,
-  mode: 'offchain',
-  highestTile: 0,
-};
+const storedData = getStoredData();
 
-const gameSlice = createSlice({
-  name: 'app',
-  initialState,
-  reducers: {
-    setGameId: (state, action: PayloadAction<string | null>) => {
-      state.gameId = action.payload;
-    },
-    updateBoard: (state, action: PayloadAction<BoardType>) => {
-      state.board = action.payload;
-      state.highestTile = calculateHighestTile(action.payload);
-      state.resultBoards.push(action.payload[0]);
-      state.animations = [];
-    },
-    addMove: (state, action: PayloadAction<number>) => {
-      state.moves.push(action.payload);
-    },
-    setActive: (state, action: PayloadAction<boolean>) => {
-      state.isActive = action.payload;
-    },
-    setMode: (state, action: PayloadAction<'onchain' | 'offchain'>) => {
-      state.mode = action.payload;
-    },
-    move: {
-      reducer(state, action) {
-        if (state.defeat) return;
-        const { direction, execute } = action.payload;
-        const update = updateBoardUtil(state.board, direction);
-        state.previousBoard = [...state.board];
-        state.board = update.board;
-        state.score += update.scoreIncrease || 0;
-        state.animations = update.animations || [];
-        state.scoreIncrease = update.scoreIncrease;
-        state.moveId = new Date().getTime().toString();
-        state.highestTile = calculateHighestTile(state.board);
-        state.defeat = !movePossible(state.board);
-        state.victory = state.highestTile >= 11;
-        if (state.score > state.best) state.best = state.score;
-        if (execute && state.gameId) {
-          execute();
+function initializeState(): GameState {
+  const update = initializeBoard(4);
+
+  return {
+    boardSize: storedData.boardSize || 4,
+    board: storedData.board || update.board,
+    defeat: storedData.defeat || false,
+    victory: false,
+    victoryDismissed: storedData.victoryDismissed || false,
+    score: storedData.score || 0,
+    best: storedData.best || 0,
+    moveId: new Date().getTime().toString(),
+  };
+}
+
+// Define the initial state using that type
+const initialState: GameState = initializeState();
+
+function gameReducer(state = initialState, action: ActionModel) {
+  const newState = { ...state };
+
+  switch (action.type) {
+    case ActionType.RESET:
+      {
+        const size = action.value || newState.boardSize;
+        const update = initializeBoard(size);
+        newState.boardSize = size;
+        newState.board = update.board;
+        newState.score = 0;
+        newState.animations = update.animations;
+        newState.previousBoard = undefined;
+        newState.victory = false;
+        newState.victoryDismissed = false;
+      }
+      break;
+    case ActionType.MOVE:
+      {
+        if (newState.defeat) {
+          break;
         }
-      },
-      prepare(direction: Direction, execute?: () => void) {
-        return { payload: { direction, execute } };
-      },
-    },
-    endGame: (state) => {
-      state.isActive = false;
-      state.moves = [];
-      state.resultBoards = [];
-    },
-    resetGame: (state) => {
-      state.gameId = null;
-      state.board = initializeBoard(4).board;
-      state.moves = [];
-      state.resultBoards = [];
-      state.isActive = false;
-      state.victory = false;
-      state.defeat = false;
-      state.victoryDismissed = false;
-      state.score = 0;
-      state.best = 0;
-      state.moveId = new Date().getTime().toString();
-      state.animations = initializeBoard(4).animations;
-      state.highestTile = 0;
-    },
-    setHighestTile: (state, action: PayloadAction<number>) => {
-      state.highestTile = action.payload;
-    },
-    dismissAction: (state) => {
-      state.victoryDismissed = true;
-    },
-  },
-});
 
-export const { setGameId, updateBoard, addMove, setActive, setMode, move, endGame, resetGame, setHighestTile, dismissAction } = gameSlice.actions;
-export default gameSlice.reducer;
+        const direction = action.value as Direction;
+        const update = updateBoard(newState.board, direction);
+        newState.previousBoard = [...newState.board];
+        newState.board = update.board;
+        newState.score += update.scoreIncrease;
+        newState.animations = update.animations;
+        newState.scoreIncrease = update.scoreIncrease;
+        newState.moveId = new Date().getTime().toString();
+      }
+      break;
+    case ActionType.UNDO:
+      if (!newState.previousBoard) {
+        break;
+      }
+
+      newState.board = newState.previousBoard;
+      newState.previousBoard = undefined;
+
+      if (newState.scoreIncrease) {
+        newState.score -= newState.scoreIncrease;
+      }
+      break;
+    case ActionType.DISMISS:
+      newState.victoryDismissed = true;
+      break;
+    default:
+      return state;
+  }
+
+  if (newState.score > newState.best) {
+    newState.best = newState.score;
+  }
+
+  newState.defeat = !movePossible(newState.board);
+  newState.victory = !!newState.board.find((value) => value === 2048);
+  setStoredData(newState);
+
+  return newState;
+}
+
+export default gameReducer;

@@ -1,42 +1,32 @@
-import { type ActionModel } from '@/types/Models';
 import { type Direction } from '@/types/Direction';
-import { type Contract } from 'ethers';
-import { setGameId, move, endGame, resetGame, setMode } from './game';
 
-export const resetAction = (boardSize: number) => (dispatch: any) => {
-  dispatch(resetGame());
-  dispatch({ type: 'setActive', payload: true });
-};
+import { ActionType } from '@/types/ActionType';
+import { type ActionModel } from '@/types/Models';
 
-export const moveAction = (direction: Direction) => {
+function resetAction(size: number): ActionModel {
   return {
-    ...move(direction),
-    execute: async (contract: Contract, gameId: string, address: string) => {
-      const tx = await contract.play(gameId, direction, 0);
-      await tx.wait();
-    },
+    type: ActionType.RESET,
+    value: size,
   };
-};
+}
 
-export const endGameAction = () => (dispatch: any) => {
-  dispatch(endGame());
-};
-
-export const selectModeAction = (mode: 'onchain' | 'offchain') => (dispatch: any) => {
-  dispatch(setMode(mode));
-};
-
-export const claimNFTAction = (gameId: string) => {
+function undoAction(): ActionModel {
   return {
-    type: 'claimNFT',
-    execute: async (contract: Contract) => {
-      const tx = await contract.claimNFT(gameId);
-      await tx.wait();
-      return tx;
-    },
+    type: ActionType.UNDO,
   };
-};
+}
 
-export const dismissAction = () => ({
-  type: 'dismiss',
-});
+function moveAction(direction: Direction): ActionModel {
+  return {
+    type: ActionType.MOVE,
+    value: direction,
+  };
+}
+
+function dismissAction(): ActionModel {
+  return {
+    type: ActionType.DISMISS,
+  };
+}
+
+export { resetAction, undoAction, moveAction, dismissAction };
