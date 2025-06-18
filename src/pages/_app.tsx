@@ -1,26 +1,19 @@
 import { store } from '@/store';
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
-import { Provider } from 'react-redux';
-import { MiniKitProvider } from '@/minikitprovider';
 import { useEffect, useState } from 'react';
+import { Provider } from 'react-redux';
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [isMounted, setIsMounted] = useState(false);
-
+  const [flag, setFlag] = useState(false);
   useEffect(() => {
-    setIsMounted(true);
+    setFlag(true);
   }, []);
-
-  if (!isMounted) {
-    return null;
-  }
-
   return (
-    <Provider store={store}>
-      <MiniKitProvider>
+    flag === true && (
+      <Provider store={store}>
         <Component {...pageProps} />
-      </MiniKitProvider>
-    </Provider>
+      </Provider>
+    )
   );
 }
