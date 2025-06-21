@@ -1,5 +1,3 @@
-import { Address } from 'wagmi';
-
 export interface LeaderboardEntry {
   rank: number;
   playerId: string;
@@ -16,3 +14,6 @@ export interface GameState {
   gameId?: string;
   isApproved?: boolean;
 }
+
+// Tambahkan tipe Address khusus jika diperlukan
+export type Address = `0x${string}`;

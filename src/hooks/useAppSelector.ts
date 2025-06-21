@@ -1,6 +1,8 @@
-import type { RootState } from '@/store';
-import { type TypedUseSelectorHook, useSelector } from 'react-redux';
+"use client"
 
-const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+import { useSelector } from "react-redux";
+import type { TypedUseSelectorHook } from "react-redux"; // Pastikan ini diimport
+import type { RootState } from "@/store"; // Pastikan path benar
 
-export default useAppSelector;
+// Gunakan named export dan type assertion
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

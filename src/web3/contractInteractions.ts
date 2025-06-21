@@ -1,52 +1,72 @@
-import { useContractRead, useContractWrite } from 'wagmi';
-import { contractAddress } from './networks';
-import abi from './api/abi';
+"use client";
 
-export const contractInteractions = {
-  approvePlayer: () => useContractWrite({
+import { useWriteContract, useReadContract } from "wagmi";
+import { contractAddress } from "./networks";
+import abi from "./api/abi";
+
+export const useContractInteractions = () => {
+  const { writeContractAsync } = useWriteContract();
+  
+  // Read functions
+  const { data: leaderboard } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi,
-    functionName: 'approvePlayer',
-  }),
-  selectMode: (isOnchain: boolean) => useContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi,
-    functionName: 'selectMode',
-    args: [isOnchain],
-  }),
-  startGame: (gameId: string, boards: number[], moves: number[]) => useContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi,
-    functionName: 'startGame',
-    args: [gameId, boards, moves],
-  }),
-  play: (move: number, resultBoard: number[]) => useContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi,
-    functionName: 'play',
-    args: [move, resultBoard],
-  }),
-  submitBatchMoves: (moves: number[], resultBoards: number[][]) => useContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi,
-    functionName: 'submitBatchMoves',
-    args: [moves, resultBoards],
-  }),
-  endGame: (gameId: string) => useContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi,
-    functionName: 'endGame',
-    args: [gameId],
-  }),
-  claimNFT: (gameId: string) => useContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi,
-    functionName: 'claimNFT',
-    args: [gameId],
-  }),
-  getLeaderboard: () => useContractRead({
-    address: contractAddress as `0x${string}`,
-    abi,
-    functionName: 'getLeaderboard',
-  }),
+    functionName: "getLeaderboard",
+  });
+
+  // Generic contract call function
+  const callContract = async (
+    functionName: string, 
+    args?: any[],
+    overrides?: any
+  ) => {
+    return writeContractAsync({
+      address: contractAddress as `0x${string}`,
+      abi,
+      functionName,
+      args,
+      ...overrides
+    });
+  };
+
+  return {
+    // Player management
+    approvePlayer: () => callContract("approvePlayer"),
+    selectMode: (isOnchain: boolean) => callContract("selectMode", [isOnchain]),
+    
+    // Game actions
+    startGame: (gameId: string, boards: number[], moves: number[]) => 
+      callContract("startGame", [gameId, boards, moves]),
+    
+    play: (move: number, resultBoard: number[]) => 
+      callContract("play", [move, resultBoard]),
+    
+    submitBatchMoves: (moves: number[], resultBoards: number[][]) => 
+      callContract("submitBatchMoves", [moves, resultBoards]),
+    
+    endGame: (gameId: string) => 
+      callContract("endGame", [gameId]),
+    
+    claimNFT: (gameId: string) => 
+      callContract("claimNFT", [gameId]),
+    
+    // View functions
+    getLeaderboard: () => leaderboard,
+    
+    // Additional utility functions
+    getPlayerStatus: (playerAddress: string) => ({
+      approved: useReadContract({
+        address: contractAddress as `0x${string}`,
+        abi,
+        functionName: "approvedPlayers",
+        args: [playerAddress]
+      }),
+      mode: useReadContract({
+        address: contractAddress as `0x${string}`,
+        abi,
+        functionName: "playerMode",
+        args: [playerAddress]
+      })
+    })
+  };
 };

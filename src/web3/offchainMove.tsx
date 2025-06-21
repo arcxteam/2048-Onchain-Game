@@ -1,23 +1,24 @@
-import { useContractWrite, usePrepareContractWrite } from 'wagmi';
-import { contractAddress } from './networks';
-import abi from './api/abi';
-import { useStateManagement } from './stateManagement';
+"use client"
 
-export const useOffchainMove = (moves: number[], resultBoards: number[][]) => {
-  const { gameId } = useStateManagement();
-  const { config } = usePrepareContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi,
-    functionName: 'submitBatchMoves',
-    args: [moves, resultBoards],
-    enabled: !!gameId,
-  });
+import { useContractInteractions } from "./contractInteractions";
+import { useStateManagement } from "./stateManagement";
+import { handleError } from "./errorHandler";
 
-  const { write, isLoading, error } = useContractWrite(config);
+export const useOffchainMove = () => {
+  const { submitBatchMoves } = useContractInteractions();
+  const { currentGameId, getCurrentGame } = useStateManagement();
 
-  const offchainMove = () => {
-    if (write && !isLoading) write();
+  const executeBatch = async (moves: number[], resultBoards: number[][]) => {
+    try {
+      const game = getCurrentGame();
+      if (!currentGameId || game?.mode !== "offchain") {
+        throw new Error("Offchain game not active");
+      }
+      return await submitBatchMoves(moves, resultBoards);
+    } catch (error) {
+      return handleError(error);
+    }
   };
 
-  return { offchainMove, isLoading, error };
+  return { executeBatch };
 };

@@ -1,4 +1,4 @@
-import { type Direction } from './Direction';
+import { type Direction } from "./Direction";
 
 export enum AnimationType {
   NEW,

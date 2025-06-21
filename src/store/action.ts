@@ -1,7 +1,7 @@
-import { type Direction } from '@/types/Direction';
+import { type Direction } from "@/types/Direction";
 
-import { ActionType } from '@/types/ActionType';
-import { type ActionModel } from '@/types/Models';
+import { ActionType } from "@/types/ActionType";
+import { type ActionModel } from "@/types/Models";
 
 function resetAction(size: number): ActionModel {
   return {

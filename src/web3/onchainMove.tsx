@@ -1,23 +1,24 @@
-import { useContractWrite, usePrepareContractWrite } from 'wagmi';
-import { contractAddress } from './networks';
-import abi from './api/abi';
-import { useStateManagement } from './stateManagement';
+"use client"
 
-export const useOnchainMove = (move: number, resultBoard: number[]) => {
-  const { gameId } = useStateManagement();
-  const { config } = usePrepareContractWrite({
-    address: contractAddress as `0x${string}`,
-    abi,
-    functionName: 'play',
-    args: [move, resultBoard],
-    enabled: !!gameId,
-  });
+import { useContractInteractions } from "./contractInteractions";
+import { useStateManagement } from "./stateManagement";
+import { handleError } from "./errorHandler";
 
-  const { write, isLoading, error } = useContractWrite(config);
+export const useOnchainMove = () => {
+  const { play } = useContractInteractions();
+  const { currentGameId, getCurrentGame } = useStateManagement();
 
-  const onchainMove = () => {
-    if (write && !isLoading) write();
+  const executeMove = async (move: number, resultBoard: number[]) => {
+    try {
+      const game = getCurrentGame();
+      if (!currentGameId || game?.mode !== "onchain") {
+        throw new Error("Onchain game not active");
+      }
+      return await play(move, resultBoard);
+    } catch (error) {
+      return handleError(error);
+    }
   };
 
-  return { onchainMove, isLoading, error };
+  return { executeMove };
 };

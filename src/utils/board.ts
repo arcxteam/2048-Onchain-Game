@@ -1,5 +1,5 @@
-import { Direction } from '../types/Direction';
-import { type Animation, AnimationType } from '../types/Animations';
+import { Direction } from "../types/Direction";
+import { type Animation, AnimationType } from "../types/Animations";
 
 export type BoardType = number[];
 
@@ -104,7 +104,7 @@ function rotateBoard(
   direction: Direction,
   undo = false,
 ): BoardType {
-  // No need to rotate, it's already in the correct orientation.
+  // No need to rotate, it"s already in the correct orientation.
   if (direction === Direction.DOWN) {
     return [...board];
   }
@@ -136,7 +136,7 @@ function rotateAnimations(
   animations: Animation[],
   direction: Direction,
 ): Animation[] {
-  // No need to rotate, it's already in the correct orientation.
+  // No need to rotate, it"s already in the correct orientation.
   if (direction === Direction.DOWN) {
     return animations;
   }

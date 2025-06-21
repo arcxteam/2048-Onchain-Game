@@ -1,5 +1,5 @@
-import { type BoardType } from '@/utils/board';
-import { type ActionType } from './ActionType';
+import { type BoardType } from "@/utils/board";
+import { type ActionType } from "./ActionType";
 
 export interface ActionModel {
   type: ActionType;

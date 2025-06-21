@@ -1,87 +1,53 @@
-import {
-  MiniKit,
-  tokenToDecimals,
-  Tokens,
-  PayCommandInput,
-  ResponseEvent,
-  MiniAppPaymentPayload,
-} from '@worldcoin/minikit-js';
-import { useEffect, useState } from 'react';
-import Control from './Control';
-import { useModeSelection } from '@/web3/modeSelection'; // Impor hook
+import { useState } from "react";
+import Control from "./Control";
+import { useModeSelection } from "@/web3/modeSelection";
 
 const Footer: React.FC = () => {
-  const [mode, setMode] = useState<'offchain' | 'onchain' | null>(null); // Placeholder untuk mode
-  const { selectMode } = useModeSelection(); // Hook dari /src/web3/
+  const [showModeSelection, setShowModeSelection] = useState(false);
+  const { currentMode, selectMode, isApproved } = useModeSelection();
 
-  useEffect(() => {
-    if (!MiniKit.isInstalled()) {
-      return;
+  const handleModeSelect = async (selectedMode: "onchain" | "offchain") => {
+    try {
+      await selectMode(selectedMode);
+      setShowModeSelection(false);
+    } catch (error) {
+      console.error("Mode selection failed:", error);
     }
-
-    MiniKit.subscribe(
-      ResponseEvent.MiniAppPayment,
-      async (payload: MiniAppPaymentPayload) => {
-        if (payload.status == 'success') {
-          const payment = await fetch(`/api/confirmpayment`, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-          });
-          const json = await payment.json();
-          if (json.success) {
-            console.log('worked!');
-          }
-        }
-      },
-    );
-
-    return () => {
-      MiniKit.unsubscribe(ResponseEvent.MiniAppPayment);
-    };
-  }, []);
-
-  const startPayment = async () => {
-    const res = await fetch(`/api/startpayment`);
-
-    const payload: PayCommandInput = {
-      reference: await res.text(),
-      to: '0xdF0d5abC614EF45C4bCEA121624644523BAc80b7',
-      tokens: [
-        {
-          symbol: Tokens.WLD,
-          token_amount: tokenToDecimals(1, Tokens.WLD).toString(),
-        },
-        {
-          symbol: Tokens.USDCE,
-          token_toDecimals: tokenToDecimals(3, Tokens.USDCE).toString(),
-        },
-      ],
-      description: 'Select Mode',
-    };
-
-    if (MiniKit.isInstalled()) {
-      MiniKit.commands.pay(payload);
-    }
-  };
-
-  const handleModeSelect = () => {
-    selectMode(); // Panggil hook
-    setMode(mode === 'offchain' ? 'onchain' : 'offchain');
   };
 
   return (
     <div className="leading-lg flex flex-col gap-y-8 text-center font-medium text-[#adadad]">
       <div className="mt-2 w-full">
         <Control />
-        <button
-          onClick={handleModeSelect}
-          className="font-lg mt-2 w-full px-16 py-4"
-        >
-          Select Mode {mode ? `(${mode})` : ''}
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowModeSelection(!showModeSelection)}
+            className="font-menlo mt-2 w-full text-[#f54b59] bg-[#082b2bfd] px-16 py-4"
+            disabled={!isApproved}
+          >
+            {currentMode ? `Mode: ${currentMode}` : "Select Mode"}
+          </button>
+          
+          {showModeSelection && (
+            <div className="absolute bottom-full left-0 right-0 mb-2 bg-gray-800 rounded-md p-2 z-10">
+              <button
+                onClick={() => handleModeSelect("onchain")}
+                className="block w-full p-2 hover:bg-gray-700"
+              >
+                Onchain Mode
+              </button>
+              <button
+                onClick={() => handleModeSelect("offchain")}
+                className="block w-full p-2 hover:bg-gray-700"
+              >
+                Offchain Mode
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       <p>
-        Onchain 2048{' '}
+        Onchain 2048{" "}
         <a
           href="https://cuannode.greyscope.xyz"
           target="_blank"

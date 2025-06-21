@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers } from "ethers";
 
 export const formatAddress = (address: string) => {
   return `${address.slice(0, 5)}...${address.slice(-5)}`;
@@ -6,6 +6,10 @@ export const formatAddress = (address: string) => {
 
 export const toBoardArray = (board: number[]) => {
   return board.map(num => BigInt(num));
+};
+
+export const bigIntToNumber = (value: bigint): number => {
+  return Number(value.toString());
 };
 
 export const generateGameId = () => {

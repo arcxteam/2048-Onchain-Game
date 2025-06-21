@@ -1,6 +1,7 @@
-import type { AppDispatch } from '@/store';
-import { useDispatch } from 'react-redux';
+"use client"
 
-const useAppDispatch = () => useDispatch<AppDispatch>();
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "@/store";
 
-export default useAppDispatch;
+// Gunakan named export
+export const useAppDispatch = () => useDispatch<AppDispatch>(); // ✅ Named export

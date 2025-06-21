@@ -1,13 +1,47 @@
-import { useWeb3Modal } from '@web3auth/modal/react';
-import { useAccount, useDisconnect } from 'wagmi';
+"use client";
+
+import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/react";
+import { useAccount, useDisconnect } from "wagmi";
 
 export const useWalletConnect = () => {
-  const { open } = useWeb3Modal();
-  const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
+  const { isInitialized } = useWeb3Auth();
+  const { connect: web3AuthConnect, loading: connecting } = useWeb3AuthConnect();
+  const { address, isConnected: isWagmiConnected } = useAccount();
+  const { disconnect: wagmiDisconnect } = useDisconnect();
 
-  const connectWallet = () => open();
-  const disconnectWallet = () => disconnect();
+  const connectWallet = async () => {
+    try {
+      if (isWagmiConnected) return address;
+      
+      // Pastikan Web3Auth sudah diinisialisasi
+      if (!isInitialized) {
+        throw new Error("Wallet provider is not initialized yet");
+      }
+      
+      // Lakukan koneksi
+      await web3AuthConnect();
+      
+      return address;
+    } catch (error) {
+      console.error("Wallet connection failed:", error);
+      throw new Error("Failed to connect wallet");
+    }
+  };
 
-  return { connectWallet, disconnectWallet, address, isConnected };
+  const disconnectWallet = async () => {
+    try {
+      wagmiDisconnect();
+    } catch (error) {
+      console.error("Wallet disconnection failed:", error);
+    }
+  };
+
+  return {
+    connectWallet,
+    disconnectWallet,
+    address,
+    isConnected: isWagmiConnected,
+    isInitializing: !isInitialized,
+    isConnecting: connecting
+  };
 };

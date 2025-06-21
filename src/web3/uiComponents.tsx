@@ -1,4 +1,6 @@
-import { LeaderboardEntry } from './types';
+"use client"
+
+import { LeaderboardEntry } from "./types";
 
 export const LeaderboardModal = ({ leaderboard }: { leaderboard: LeaderboardEntry[] }) => {
   return (

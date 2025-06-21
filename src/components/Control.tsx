@@ -1,8 +1,8 @@
-import useAppDispatch from '@/hooks/useAppDispatch';
-import useAppSelector from '@/hooks/useAppSelector';
-import { resetAction } from '@/store/action';
-import React from 'react';
-import { useCallback } from 'react';
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { useAppSelector } from "@/hooks/useAppSelector";
+import { resetAction } from "@/store/action";
+import React from "react";
+import { useCallback } from "react";
 
 const Control = () => {
   const dispatch = useAppDispatch();

@@ -1,27 +1,62 @@
-import { contractInteractions } from './contractInteractions';
-import { useState, useEffect } from 'react';
-import { useStateManagement } from './stateManagement';
+"use client";
+
+import { useContractInteractions } from "./contractInteractions";
+import { useState, useEffect } from "react";
+import { useAccount, useReadContract } from "wagmi";
+import { contractAddress } from "./networks";
+import abi from "./api/abi";
 
 export const useModeSelection = () => {
-  const [mode, setMode] = useState<'offchain' | 'onchain'>('offchain');
-  const { isApproved, setApproved } = useStateManagement();
+  const { address } = useAccount();
+  const { approvePlayer, selectMode } = useContractInteractions();
+  const [currentMode, setCurrentMode] = useState<"onchain" | "offchain" | null>(null);
+  const [isApproved, setIsApproved] = useState(false);
+
+  // Check approval and mode status on load
+  const { data: approvedStatus } = useReadContract({
+    address: contractAddress as `0x${string}`,
+    abi,
+    functionName: "approvedPlayers",
+    args: [address]
+  });
+
+  const { data: playerMode } = useReadContract({
+    address: contractAddress as `0x${string}`,
+    abi,
+    functionName: "playerMode",
+    args: [address]
+  });
 
   useEffect(() => {
-    const { write: approve } = contractInteractions.approvePlayer();
-    if (approve && !isApproved) {
-      approve().then(() => setApproved(true));
+    if (approvedStatus) {
+      setIsApproved(approvedStatus as boolean);
     }
-  }, [isApproved]);
+    if (playerMode !== undefined) {
+      setCurrentMode(playerMode ? "onchain" : "offchain");
+    }
+  }, [approvedStatus, playerMode]);
 
-  const selectMode = async () => {
-    if (isApproved && mode !== 'offchain') {
-      await contractInteractions.selectMode(true);
-      setMode('onchain');
-    } else if (isApproved) {
-      await contractInteractions.selectMode(false);
-      setMode('offchain');
-    }
+  const handleApprove = async () => {
+    if (!address || isApproved) return;
+    await approvePlayer();
+    setIsApproved(true);
   };
 
-  return { mode, selectMode };
+  const handleSelectMode = async (mode: "onchain" | "offchain") => {
+    if (!address) return;
+    
+    if (!isApproved) {
+      await handleApprove();
+    }
+
+    await selectMode(mode === "onchain");
+    setCurrentMode(mode);
+  };
+
+  return {
+    currentMode,
+    selectMode: handleSelectMode,
+    isApproved,
+    approvePlayer: handleApprove
+  };
 };

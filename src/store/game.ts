@@ -1,14 +1,14 @@
-import { ActionType } from '@/types/ActionType';
-import { type Animation } from '@/types/Animations';
-import { type Direction } from '@/types/Direction';
-import { type ActionModel } from '@/types/Models';
+import { ActionType } from "@/types/ActionType";
+import { type Animation } from "@/types/Animations";
+import { type Direction } from "@/types/Direction";
+import { type ActionModel } from "@/types/Models";
 import {
   initializeBoard,
   type BoardType,
   updateBoard,
   movePossible,
-} from '@/utils/board';
-import { getStoredData, setStoredData } from '@/utils/localStorage';
+} from "@/utils/board";
+import { getStoredData, setStoredData } from "@/utils/localStorage";
 
 // Define a type for the game state
 export interface GameState {

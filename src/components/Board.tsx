@@ -1,22 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import Tile from './Tile';
-import useAppDispatch from '@/hooks/useAppDispatch';
-import useAppSelector from '@/hooks/useAppSelector';
-import { type Point } from '@/types/Models';
-import { Direction } from '@/types/Direction';
-import { moveAction } from '@/store/action';
-import { type BoardType } from '@/utils/board';
-import { type Animation, AnimationType } from '@/types/Animations';
-import Overlay from './Overlay';
+import Tile from "./Tile";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { useAppSelector } from "@/hooks/useAppSelector";
+import { type Point } from "@/types/Models";
+import { Direction } from "@/types/Direction";
+import { moveAction } from "@/store/action";
+import { type BoardType } from "@/utils/board";
+import { type Animation, AnimationType } from "@/types/Animations";
+import Overlay from "./Overlay";
 
 const Board = () => {
   const dispatch = useAppDispatch();
   const board = useAppSelector((state) => state.app.board);
   const boardSize = useAppSelector((state) => state.app.boardSize);
   const animations = useAppSelector((state) => state.app.animations);
-  const startPointerLocation = useRef<Point>();
-  const currentPointerLocation = useRef<Point>();
+  const startPointerLocation = useRef<Point | undefined>(undefined);
+  const currentPointerLocation = useRef<Point | undefined>(undefined);
 
   const animationDuration = 180;
 
@@ -28,32 +28,32 @@ const Board = () => {
   const [renderedBoard, setRenderedBoard] = useState(board);
   const [renderedAnimations, setRenderedAnimations] = useState<Animation[]>([]);
   const lastBoard = useRef<BoardType>([...board]);
-  const animationTimeout = useRef<number>();
+  const animationTimeout = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const keydownListener = (e: KeyboardEvent) => {
       e.preventDefault();
 
       switch (e.key) {
-        case 'ArrowDown':
+        case "ArrowDown":
           onMove(Direction.DOWN);
           break;
-        case 'ArrowUp':
+        case "ArrowUp":
           onMove(Direction.UP);
           break;
-        case 'ArrowLeft':
+        case "ArrowLeft":
           onMove(Direction.LEFT);
           break;
-        case 'ArrowRight':
+        case "ArrowRight":
           onMove(Direction.RIGHT);
           break;
       }
     };
 
-    window.addEventListener('keydown', keydownListener);
+    window.addEventListener("keydown", keydownListener);
 
     return () => {
-      window.removeEventListener('keydown', keydownListener);
+      window.removeEventListener("keydown", keydownListener);
     };
   }, [onMove]);
 
