@@ -40,99 +40,94 @@ const Header = () => {
   };
 
   return (
-    <div className="flex flex-col w-full bg-white shadow-sm">
-      {/* Kontrol Horizontal - Lebih Kompak */}
-      <div className="flex flex-wrap justify-between items-center bg-[#ffffff] w-full py-2 px-2 sm:px-4">
-        {/* Logo - Kiri */}
-        <div className="flex-shrink-0 mr-2">
-          {logoError ? (
-            <h4 className="text-xl sm:text-2xl font-bold text-[#ff6270]">2048</h4>
-          ) : (
-            <Image 
-              src="/2048-logo.svg" 
-              width={250} 
-              height={100} 
-              alt="2048 Logo"
-              className="object-contain"
-              onError={() => setLogoError(true)}
-            />
-          )}
+    <div className="flex w-full bg-white shadow-sm px-2 sm:px-4 py-2">
+      {/* Logo - Left */}
+      <div className="flex-shrink-0 mr-2">
+        {logoError ? (
+          <h4 className="text-xl sm:text-2xl font-bold text-[#ff6270]">2048</h4>
+        ) : (
+          <Image 
+            src="/2048-logo.svg" 
+            width={250} 
+            height={100} 
+            alt="2048 Logo"
+            className="object-contain"
+            onError={() => setLogoError(true)}
+          />
+        )}
+      </div>
+      
+      {/* Controls - Right (Grid Layout) */}
+      <div className="grid grid-cols-2 gap-1 sm:gap-2 ml-auto">
+        {/* Top Row */}
+        <div className="flex items-center gap-1 rounded bg-[#ff6270] px-2 py-1 text-white text-xs sm:text-sm">
+          <span className="font-bold">SCORE:</span>
+          <span className="font-menlo font-bold">{score}</span>
         </div>
         
-        {/* Kontrol Kanan */}
-        <div className="flex flex-wrap justify-end items-center gap-1 sm:gap-2 flex-1">
-          {/* Score */}
-          <div className="flex items-center gap-1 rounded-lg bg-[#ff6270] px-2 py-1 text-white text-xs sm:text-sm">
-            <span className="font-bold">SCORE:</span>
-            <span className="font-menlo font-bold">{score}</span>
-          </div>
-          
-          {/* Best */}
-          <div className="flex items-center gap-1 rounded-lg bg-[#47e94f] px-2 py-1 text-white text-xs sm:text-sm">
-            <span className="font-bold">BEST:</span>
-            <span className="font-menlo font-bold">{best}</span>
-          </div>
-          
-          {/* Wallet Button */}
-          <div className="relative">
-            <button
-              className={`flex items-center justify-center gap-1 rounded-lg px-2 py-1 min-w-[90px] sm:min-w-[110px] text-xs sm:text-sm transition-all
-                ${
-                  isConnected 
-                    ? "bg-[#4a86e8] text-black" 
-                    : "bg-[#FF833B] text-white"
-                }
-                ${(isInitializing || isConnecting) ? "opacity-70 cursor-not-allowed" : "hover:opacity-90"}`}
-              onClick={handleWalletClick}
-              disabled={isInitializing || isConnecting}
-            >
-              {isInitializing ? (
-                "Inittializing.."
-              ) : isConnecting ? (
-                "Connection"
-              ) : isConnected ? (
-                <span className="truncate">{formatAddress(address || "")}</span>
-              ) : (
-                "Connect"
-              )}
-            </button>
-          </div>
-          
-          {/* Leaderboard Button */}
-          <div className="relative">
-            <button
-              className="flex items-center justify-center gap-1 rounded-lg bg-[#4a86e8] px-2 py-1 text-white text-xs sm:text-sm min-w-[80px] hover:opacity-90"
-              onClick={() => setShowLeaderboard(!showLeaderboard)}
-            >
-              <span>Leaderboard</span>
-            </button>
-            
-            {showLeaderboard && leaderboard && leaderboard.length > 0 && (
-              <div className="absolute right-0 z-10 mt-1 w-64 rounded-lg bg-white border border-gray-300 p-3 shadow-lg">
-                <h3 className="mb-2 font-bold text-[#ff6270] text-sm">TOP PLAYERS</h3>
-                <ul className="max-h-60 overflow-y-auto space-y-1">
-                  {leaderboard.map((entry) => (
-                    <li key={entry.rank} className="py-1 px-2 bg-gray-100 rounded">
-                      <div className="flex justify-between text-xs">
-                        <span className="font-bold text-gray-700">#{entry.rank}</span>
-                        <span className="font-mono truncate max-w-[100px]">{entry.playerId}</span>
-                      </div>
-                      <div className="flex justify-between mt-1 text-[10px]">
-                        <span className="text-green-600">{entry.points} XP</span>
-                        <span className="text-purple-600">Level {entry.nftLevel}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+        <div className="flex items-center gap-1 rounded bg-[#47e94f] px-2 py-1 text-white text-xs sm:text-sm">
+          <span className="font-bold">BEST:</span>
+          <span className="font-menlo font-bold">{best}</span>
+        </div>
+        
+        {/* Bottom Row */}
+        <div className="relative">
+          <button
+            className={`flex items-center justify-center rounded px-2 py-1 w-full text-xs sm:text-sm transition-all
+              ${
+                isConnected 
+                  ? "bg-[#4a86e8] text-black" 
+                  : "bg-[#FF833B] text-white"
+              }
+              ${(isInitializing || isConnecting) ? "opacity-70 cursor-not-allowed" : "hover:opacity-90"}`}
+            onClick={handleWalletClick}
+            disabled={isInitializing || isConnecting}
+          >
+            {isInitializing ? (
+              "Initializing.."
+            ) : isConnecting ? (
+              "Connecting.."
+            ) : isConnected ? (
+              <span className="truncate">{formatAddress(address || "")}</span>
+            ) : (
+              "Connect Wallet"
             )}
-          </div>
+          </button>
+        </div>
+        
+        <div className="relative">
+          <button
+            className="flex items-center justify-center rounded bg-[#4a86e8] px-2 py-1 text-white text-xs sm:text-sm w-full hover:opacity-90"
+            onClick={() => setShowLeaderboard(!showLeaderboard)}
+          >
+            <span>Leaderboard</span>
+          </button>
+          
+          {showLeaderboard && leaderboard && leaderboard.length > 0 && (
+            <div className="absolute right-0 z-10 mt-1 w-64 rounded bg-white border border-gray-300 p-2 shadow-lg">
+              <h3 className="mb-1 font-bold text-[#ff6270] text-xs">TOP PLAYERS</h3>
+              <ul className="max-h-60 overflow-y-auto space-y-1">
+                {leaderboard.map((entry) => (
+                  <li key={entry.rank} className="py-1 px-2 bg-gray-100 rounded">
+                    <div className="flex justify-between text-xs">
+                      <span className="font-bold text-gray-700">#{entry.rank}</span>
+                      <span className="font-mono truncate max-w-[100px]">{entry.playerId}</span>
+                    </div>
+                    <div className="flex justify-between mt-0.5 text-[9px]">
+                      <span className="text-green-600">{entry.points} XP</span>
+                      <span className="text-purple-600">Level {entry.nftLevel}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Error message */}
       {errorMessage && (
-        <div className="fixed top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-md text-xs z-50">
+        <div className="fixed top-2 right-2 bg-red-600 text-white px-3 py-1 rounded text-xs z-50">
           {errorMessage}
         </div>
       )}
