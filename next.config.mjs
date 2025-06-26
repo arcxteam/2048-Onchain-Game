@@ -2,10 +2,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  allowedDevOrigins: [
-    "http://localhost:3000",
-    "http://10.0.11.161:3000",
-  ],
+
+  // INI BISA DI AKTIFKAN JIKA PAKAI CODESPACE GITHUB LANGSUNG
+  // allowedDevOrigins: [
+  //  "https://test.greyscope.xyz",
+  //  "http://0.0.0.0:3000",
+  //  "http://localhost:3000",
+  // ],
   webpack: (config) => {
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -22,11 +25,8 @@ const nextConfig = {
 
     return config;
   },
-  // swcMinify: true,
+  // swcMinify: true, JIKA NEXT.JS VERSI 15 KEBAWAH
   transpilePackages: [
-    '@web3auth/modal',
-    '@web3auth/base',
-    '@web3auth/ui',
     '@react-native-async-storage/async-storage',
   ],
 };
