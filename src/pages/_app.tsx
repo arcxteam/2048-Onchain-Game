@@ -4,6 +4,7 @@ import type { AppProps } from "next/app";
 import { Provider } from "react-redux";
 import { Providers } from "@/web3/providers";
 import { useEffect, useState } from "react";
+import '@rainbow-me/rainbowkit/styles.css';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [isClient, setIsClient] = useState(false);
@@ -12,7 +13,6 @@ export default function App({ Component, pageProps }: AppProps) {
     setIsClient(true);
   }, []);
 
-  // Render placeholder selama di server
   if (!isClient) {
     return (
       <div className="flex justify-center items-center h-screen bg-black">
