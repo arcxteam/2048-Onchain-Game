@@ -4,6 +4,7 @@ import { useWalletConnect } from "@/web3/useWalletConnect";
 import { useLeaderboard } from "@/web3/leaderboard";
 import { formatAddress } from "@/web3/utils";
 import React, { useState } from "react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const Header = () => {
   const score = useAppSelector((state) => state.app.score);
@@ -15,7 +16,7 @@ const Header = () => {
     address, 
     isConnected,
     isInitializing,
-    isConnecting
+    isConnecting,
   } = useWalletConnect();
   
   const { leaderboard } = useLeaderboard();
