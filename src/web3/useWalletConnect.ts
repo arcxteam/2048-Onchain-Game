@@ -1,38 +1,33 @@
 "use client";
 
-import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/react";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { useState } from "react";
 
 export const useWalletConnect = () => {
-  const { isInitialized } = useWeb3Auth();
-  const { connect: web3AuthConnect, loading: connecting } = useWeb3AuthConnect();
-  const { address, isConnected: isWagmiConnected } = useAccount();
-  const { disconnect: wagmiDisconnect } = useDisconnect();
+  const { connectAsync, connectors, status: connectStatus } = useConnect();
+  const { address, isConnected } = useAccount();
+  const { disconnectAsync } = useDisconnect();
 
   const connectWallet = async () => {
     try {
-      if (isWagmiConnected) return address;
+      if (isConnected) return address;
       
-      // Pastikan Web3Auth sudah diinisialisasi
-      if (!isInitialized) {
-        throw new Error("Wallet provider is not initialized yet");
-      }
+      // Pilih wallet pertama (MetaMask) atau bisa dibuat selector UI
+      const { connector } = await connectAsync({ connector: connectors[0] });
       
-      // Lakukan koneksi
-      await web3AuthConnect();
-      
+      if (!connector) throw new Error("Wallet tidak terhubung");
       return address;
     } catch (error) {
-      console.error("Wallet connection failed:", error);
-      throw new Error("Failed to connect wallet");
+      console.error("Gagal connect:", error);
+      throw error;
     }
   };
 
   const disconnectWallet = async () => {
     try {
-      wagmiDisconnect();
+      await disconnectAsync();
     } catch (error) {
-      console.error("Wallet disconnection failed:", error);
+      console.error("Gagal disconnect:", error);
     }
   };
 
@@ -40,8 +35,8 @@ export const useWalletConnect = () => {
     connectWallet,
     disconnectWallet,
     address,
-    isConnected: isWagmiConnected,
-    isInitializing: !isInitialized,
-    isConnecting: connecting
+    isConnected,
+    isInitializing: false, // RainbowKit handle sendiri
+    isConnecting: connectStatus === "pending"
   };
 };
