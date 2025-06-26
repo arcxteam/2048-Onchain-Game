@@ -1,15 +1,20 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { type ReactNode, useState, useEffect } from "react";
-import { Web3AuthProvider } from "@web3auth/modal/react";
+import { type ReactNode, useState } from "react";
+import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
-import { createConfig, http } from "wagmi";
-import { metaMask } from "wagmi/connectors";
+import { http } from "wagmi";
 import { defineChain } from "viem";
-import { CHAIN_NAMESPACES, WEB3AUTH_NETWORK } from "@web3auth/base";
+import { 
+  metaMaskWallet, 
+  okxWallet,
+  trustWallet,
+  coinbaseWallet,
+  rainbowWallet
+} from "@rainbow-me/rainbowkit/wallets";
 
-// PERBAIKAN: Chain ID harus dalam format hex yang benar (0x40d9 untuk 16601)
+// Chain OG Galileo
 const ogGalileoTestnet = defineChain({
   id: 16601,
   name: "OG-Galileo-Testnet",
@@ -32,67 +37,39 @@ const ogGalileoTestnet = defineChain({
   },
 });
 
-const config = createConfig({
+// Konfigurasi RainbowKit (TANPA WalletConnect)
+const config = getDefaultConfig({
+  appName: "2048 Game",
+  projectId: "default_project_id", // Bisa diisi random, tidak dipakai
   chains: [ogGalileoTestnet],
-  connectors: [metaMask()],
   transports: {
     [ogGalileoTestnet.id]: http()
-  }
+  },
+  wallets: [
+    {
+      groupName: "Recommended",
+      wallets: [
+        metaMaskWallet,
+        okxWallet,
+        trustWallet,
+        coinbaseWallet,
+        rainbowWallet
+      ],
+    },
+  ],
+  ssr: true,
 });
 
-type Props = {
-  children: ReactNode;
-};
-
-export function Providers({ children }: Props) {
+export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // PERBAIKAN: Chain ID dalam format hex yang benar (0x40d9)
-  const web3AuthConfig = {
-    web3AuthOptions: {
-      clientId: process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID!,
-      web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
-      chainConfig: {
-        chainNamespace: CHAIN_NAMESPACES.EIP155,
-        chainId: "0x40d9", // Hex dari 16601 (huruf kecil)
-        rpcTarget: "https://evmrpc-testnet.0g.ai",
-        displayName: "OG Galileo Testnet",
-        ticker: "OG",
-        tickerName: "OG Token"
-      }
-    },
-    modalConfig: {
-      metamask: {
-        name: "metamask",
-        showOnModal: true,
-        package: null
-      }
-    }
-  };
-
-  if (!isMounted) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-black">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-white text-lg">Initializing wallet providers...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <Web3AuthProvider config={web3AuthConfig}>
+    <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <WagmiProvider config={config}>
+        <RainbowKitProvider>
           {children}
-        </WagmiProvider>
+        </RainbowKitProvider>
       </QueryClientProvider>
-    </Web3AuthProvider>
+    </WagmiProvider>
   );
 }
