@@ -1,34 +1,29 @@
 "use client";
 
-import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { useState } from "react";
+import { useAccount, useDisconnect } from "wagmi";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+// import { useState } from "react";
 
 export const useWalletConnect = () => {
-  const { connectAsync, connectors, status: connectStatus } = useConnect();
+  const { openConnectModal } = useConnectModal();
   const { address, isConnected } = useAccount();
   const { disconnectAsync } = useDisconnect();
 
   const connectWallet = async () => {
     try {
       if (isConnected) return address;
+      if (!openConnectModal) throw new Error("Modal not be ready");
       
-      // Pilih wallet pertama (MetaMask) atau bisa dibuat selector UI
-      const { connector } = await connectAsync({ connector: connectors[0] });
-      
-      if (!connector) throw new Error("Wallet tidak terhubung");
+      openConnectModal(); // Trigger modal RainbowKit
       return address;
     } catch (error) {
-      console.error("Gagal connect:", error);
+      console.error("Connection error:", error);
       throw error;
     }
   };
 
   const disconnectWallet = async () => {
-    try {
-      await disconnectAsync();
-    } catch (error) {
-      console.error("Gagal disconnect:", error);
-    }
+    await disconnectAsync();
   };
 
   return {
@@ -36,7 +31,7 @@ export const useWalletConnect = () => {
     disconnectWallet,
     address,
     isConnected,
-    isInitializing: false, // RainbowKit handle sendiri
-    isConnecting: connectStatus === "pending"
+    isInitializing: false,
+    isConnecting: false
   };
 };
