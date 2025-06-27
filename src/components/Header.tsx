@@ -4,7 +4,7 @@ import { useWalletConnect } from "@/web3/useWalletConnect";
 import { useLeaderboard } from "@/web3/leaderboard";
 import { formatAddress } from "@/web3/utils";
 import React, { useState } from "react";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 const Header = () => {
   const score = useAppSelector((state) => state.app.score);
@@ -31,15 +31,14 @@ const Header = () => {
       await disconnectWallet();
     } else {
       try {
-        await connectWallet();
+        await connectWallet(); // trigger modal RainbowKit
       } catch (error) {
-        console.error("Connection error:", error);
-        setErrorMessage("Failed to connect wallet. Please try again.");
+        setErrorMessage("Failed to connect wallet");
         setTimeout(() => setErrorMessage(null), 5000);
       }
     }
   };
-
+  
   return (
     <div className="flex w-full bg-white shadow-sm px-2 sm:px-4 py-2">
       {/* Logo - Left */}
