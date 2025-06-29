@@ -32,7 +32,7 @@ Finally, open your browser and go to http://localhost:3000 to play the game.
 Struktur File Asli (FINAL)
 
 game/
-├── .env.local
+├── .env
 ├── .eslintrc.cjs
 ├── .gitignore
 ├── .npmrc
@@ -43,7 +43,7 @@ game/
 ├── lint-staged.config.cjs
 ├── next.config.mjs
 ├── package.json
-├── pnpm-lock.yaml
+├── pnpm-lock.yaml (dapat dihapus jika install depedency baru)
 ├── postcss.config.cjs
 ├── prettier.config.cjs
 ├── tailwind.config.cjs
