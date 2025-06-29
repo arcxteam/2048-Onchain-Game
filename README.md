@@ -87,9 +87,6 @@ game/
     │   ├── _app.tsx
     │   ├── _document.tsx
     │   ├── index.tsx
-    │   └── api/
-    │       ├── confirmpayment.ts
-    │       └── startpayment.ts
     ├── store/
     │   ├── action.ts
     │   ├── game.ts
